@@ -1,0 +1,288 @@
+/*
+ * Copyright (c) 2008-2009
+ *
+ * School of Computing, University of Utah,
+ * Salt Lake City, UT 84112, USA
+ *
+ * and the Gauss Group
+ * http://www.cs.utah.edu/formal_verification
+ *
+ * See LICENSE for licensing information
+ */
+
+/*
+ * ISP: MPI Dynamic Verification Tool
+ *
+ * File:        Scheduler.hpp
+ * Description: Scheduler that implements the process scheduling
+ * Contact:     isp-dev@cs.utah.edu
+ */
+
+#ifndef _SCHEDULER_HPP
+#define _SCHEDULER_HPP
+/*removed to use sched-opt.h: te_Exp_Mode
+#define EXPLORE_ALL 0
+#define EXPLORE_RANDOM 1
+#define EXPLORE_LEFT_MOST 2
+*/
+#define EXPLORE_SOME 3
+
+#ifdef CONFIG_DEBUG_SCHED
+#define DR(code) if(Scheduler::_debug) { code }
+#define DS(code) { code }
+#else
+#define DR(code)
+#define DS(code)
+#endif
+
+// Need forward declarations to eliminate circular dependencies of header files.
+class Node;
+class ITree;
+class M;
+class W;
+
+#include <list>
+#include "ServerSocket.hpp"
+#include "MpiProc.hpp"
+#include "name2id.hpp"
+#include <vector>
+#include "Transition.hpp"
+#include <fstream>
+#include <iostream>
+#include "sched-opt.h"
+#include <cassert>
+#include <set>
+
+/* 
+ *  HELPER FUNCTIONS
+ */
+
+#define MAX_T 500000
+
+// std::set<int> getImmediateAncestorList(Node*, int,  std::vector<int>&); 
+// std::set<int> getImmediateDescendantList(Node*, int, std::vector<int>&); 
+// std::set<int> getAllAncestorList(Node *,  CB);
+// std::set<int> getAllDescendantList(Node*, CB);
+
+// typedef std::vector<std::pair <CB, CB> > CeRVec;
+// typedef std::vector<std::pair <CB, CB> > ::iterator  CeRVecIterator;
+
+// class CeR {
+
+// public:
+//   CeR();
+//   ~CeR(){}
+//   void CeRConstruct(ITree*);
+//   CeRVecIterator isPresent(std::pair<CB, CB> &);
+//   void removeCrEdge(std::pair <CB, CB> );
+//   void addCrEdge (std::pair<CB, CB> );
+//   void CheckUpdateCeRAncs(Node*, int, int, std::set<int>, int&);
+//   void CheckUpdateCeRDesc(Node*, Node*, int, int, std::set<int>, int&);
+//   bool CeRupdate(std::pair<CB, CB>);
+//   void CeRConstructAncs(Node*, Node*);
+//   void CeRConstructDesc(Node*, Node*);
+//   void debugPrint();
+//   // co-enabled image of <CB, CB>
+//   //
+//   std::set<CB> findCoEnabledImage(CB c);
+//   std::set<CB> findCoEnabledImageNotFrom(CB c, int);
+//   CB find_first_CoI(std::set<CB>, int);
+//   CB find_last_CoI(std::set<CB>, int);
+ 
+  
+//   friend std::ostream &operator<< (std::ostream &os, const CeR &c);
+  
+//   CeRVec cer;
+// };
+
+// typedef std::vector<std::pair <CB, CB> > WfRVec;
+// typedef std::vector<std::pair <CB, CB> > ::iterator  WfRVecIterator;
+
+
+// class WfR {
+
+// public:
+//   WfR();
+//   ~WfR(){}
+//   WfRVecIterator isPresent(std::pair<CB, CB> &);
+//   void removeWfEdge(std::pair <CB, CB> ); 
+//   void addWfEdge(std::pair <CB, CB>);
+//   void addWfSet(CB, std::set<int>, int);
+//   void transitiveClosure ();
+//   std::set<int> find_first_op_ancestor_set(Node*, int, int);
+//   std::set<int> find_k_op_ancestor_set(Node*, int, int, int);
+//   CB find_first_CoI(std::set<CB>, int);
+//   CB find_last_CoI(std::set<CB>, int);
+//   std::pair<CB, CB> getLastWfR(std::pair<CB, CB>);
+//   friend std::ostream &operator<< (std::ostream &os, const WfR &c);
+
+//   void WfRConstructDet(Node*, Node*);
+//   void WfRConstructNonDet(Node*, Node*);
+//   void WfRConstruct(ITree*);
+//   CeR * coenabledPtr;
+
+//   WfRVec wfr;
+  
+// };
+
+
+/*
+ * This inherits from the ServerSocket so that the Scheduler itself acts as
+ * the  server and receives client requests directly to it.
+ *
+ * Implementing Scheduler as a singleton.
+ */
+class Scheduler : public ServerSocket {
+
+public:
+  /*
+   * Returns a pointer to a scheduler object
+   */
+  static Scheduler* GetInstance ();
+  /*
+   * Starts the scheduling process.
+   */
+  void  StartMC ();
+  /*
+   * SetParams - This function must be invoked before any other
+   * function can be invoked!
+   */
+/* == fprs start == */
+/* 
+  static void SetParams (std::string port, std::string num_clients,
+                         std::string server, bool send_block, std::string fname,
+                         std::string logfile, std::vector<std::string> fargs,
+                         bool mpicalls, bool verbose, bool quiet, bool unix_sockets, 
+                         int report_progress, bool fib, bool openmp, 
+                         bool use_env_only,
+                         bool batch_mode, bool stop_at_deadlock, 
+                         te_Exp_Mode explore_mode, int explore_some, 
+                         std::vector<int>* explore_all,
+                         std::vector<int>* explore_random, std::vector<int>* explore_left_most,
+                         bool debug, bool no_ample_set_fix, unsigned bound, bool limit_output);
+*/
+  static void SetParams (std::string port, std::string num_clients,
+                         std::string server, bool send_block, std::string fname,
+                         std::string logfile, std::vector<std::string> fargs,
+                         bool mpicalls, bool verbose, bool quiet, bool unix_sockets, 
+                         int report_progress, bool fib, bool openmp, 
+                         bool use_env_only,
+                         bool batch_mode, bool stop_at_deadlock, 
+                         te_Exp_Mode explore_mode, int explore_some, 
+                         std::vector<int>* explore_all,
+                         std::vector<int>* explore_random, std::vector<int>* explore_left_most,
+                         bool debug, bool no_ample_set_fix, unsigned bound, bool limit_output, bool fprs);
+/* == fprs end == */
+  /*
+   * Processes that can run are here.
+   */
+  static std::vector <MpiProc *> _runQ;
+  
+private:
+  /*
+   * Constructor: The constructor requires the port number it
+   * must run on and the number of clients (MPI processes) that
+   * it must schedule.
+   *
+   * Need to figure out how Scheduler will integrate with the
+   * DPOR interleaver (for that matter any interleaver!)
+   */
+  
+  Scheduler ();
+  
+  /*
+   * copy constructor
+   */
+  Scheduler (const Scheduler &);
+
+  /*
+   * Assignment operator.
+   */
+
+  Scheduler& operator= (const Scheduler &);
+  /*
+   * Start Clients
+   */
+  void StartClients ();
+    
+  int Restart ();
+  std::string ProgName ();
+  void generateFirstInterleaving ();
+  Transition *getTransition (int);
+  bool hasMoreEnvelopeToRead ();
+  /*
+   * begin CoE modification
+   * sriram, svs
+   */
+
+  // bool ApplyRefineRuleOne();
+  // bool SearchAndRemoveCeR(std::set<int>, std::set<int>, CB, CB); 
+
+  // std::set<int> computeSet_D1(std::set<int> , int, CB , CB ); 
+  // std::set<int> computeSet_D2(int , CB );
+  // std::set<int> compute_D3(std::set<int> , int , int );
+  // void printSet(std::set<int> , int);
+  // void computeSet_D2_D3_when_D1_isSend(std::set<int> D1, std::set<int> &D2, std::set<int> &D3, int index, int frompid, CB c);
+  // void computeSet_D2_D3_when_D1_isRecv(std::set<int> D1, std::set<int> &D2, std::set<int> &D3, int index, int frompid, CB c);
+    
+  // void deadlockDetection();
+  // std::pair<CB,CB> deadlockCheckDet();
+  // CB deadlockCheckWfR();
+  // void suggestErrorTraceDet(std::pair<CB, CB>);
+  // void suggestErrorTraceWfR(std::pair<CB, CB>);
+  
+  // end of modification
+
+  ITree *it;
+
+  /* begin CeR modification -- svs */
+  M *m;
+  W *w;
+   /* end of modification --svs */
+
+  static Scheduler*               _instance;
+  static std::string              _num_procs;
+  static std::string              _fname;
+  static std::vector<std::string> _fargs;
+  static std::string              _port;
+  static std::string              _server;
+  static bool                     _param_set;
+  static int                      _errorno;
+  static fd_set                   _fds;
+  static SOCKET                   _lfd;
+  static std::map <SOCKET, int>   _fd_id_map;
+  static Node                     *root;
+public: 
+  static int                      interleavings;
+  static bool                     _send_block;
+  static bool                     _mpicalls;
+  static bool                     _verbose;
+  static bool                     _quiet;
+  static bool                     _unix_sockets;
+  static int                      _report_progress;
+  static bool                     _fib;
+  static std::ofstream            _logfile;
+  static std::stringstream        _mismatchLog;//CGD
+  static bool                     _openmp;
+  static bool                     _env_only;
+  static bool                     _batch_mode;
+  static bool                     _probed;
+  static te_Exp_Mode              _explore_mode;
+  static int                      _explore_some;
+  static bool                     _just_dead_lock;
+  static bool                     _stop_at_deadlock;
+  static bool                     _deadlock_found;
+  static bool                     _debug;
+  static bool                     _no_ample_set_fix;
+  static unsigned                 _bound;
+  static bool											_limit_output;//CGD
+  
+  int                             order_id;
+  static std::vector<int>                *_explore_all;
+  static std::vector<int>                *_explore_random;
+  static std::vector<int>                *_explore_left_most;
+/* == fprs start == */
+  static bool                     _fprs;
+/* == fprs end == */
+};
+#endif
