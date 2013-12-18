@@ -1996,6 +1996,7 @@ MatchPtr poEncoding::getMPtr(CB A)
 
 void poEncoding::dlock()
 {
+  bvt lst;
   formula << "****dlock****" << std::endl; 
   formula << "(";
   forall_transitionLists(iter, last_node->_tlist){
@@ -2004,11 +2005,13 @@ void poEncoding::dlock()
       CB A (env->id, env->index); 
       if(env->func_id == FINALIZE){
 	literalt X_f = getFinalizeWaitLiterals(A);
-	slv.l_set_to(slv.lnot(X_f), true);
-	formula << "!" << getLitName(X_f,1) << " & "; 
+	lst.push_back(slv.lnot(X_f));
+	//slv.l_set_to(slv.lnot(X_f), true);
+	formula << "!" << getLitName(X_f,1) << " | "; 
       }
     }
   }
+  slv.l_set_to(slv.lor(lst), true);
   formula << ")" << std::endl;
 }
 
@@ -2090,7 +2093,7 @@ void poEncoding:: init()
 	  formula << getLitName(X_f, 1) << " & ";
 	  slv.l_set_to(X_f, true);
 	}
-	if(envA->isSendType() || envA->isRecvType()){
+	if( envA->isRecvType()){//(envA->isSendType() || envA->isRecvType()){
 	  bvt lst;
 	  forall_matchSet(mit, matchSet){
 	    CB Mf = (**mit).front();
@@ -2357,6 +2360,9 @@ void poEncoding::poEnc()
   processPO();
   dlock();
   gettimeofday(&constGenEnd, NULL);
+  
+  formula.str("");
+  formula.clear();
 
   getTimeElapsed(constGenStart, constGenEnd);
   std::cout << "********* SAT VALUATIONS ************" << std::endl;
@@ -2364,6 +2370,7 @@ void poEncoding::poEnc()
   std::cout << "Number of Variables: " << slv.no_variables() << std::endl;
   std::cout << "Constraint Generation Time: "
 	    << (getTimeElapsed(constGenStart, constGenEnd)*1.0)/1000000 << "sec \n";
+
   
   gettimeofday(&solverStart, NULL);
   satcheckt::resultt answer = slv.prop_solve();
