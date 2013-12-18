@@ -3747,7 +3747,7 @@ void Encoding3::encodingPartialOrders()
   waitMatch();
   //nonOverTakingMatch();
   notAllMatched();
-  makingMatchesHappenSooner();
+  //  makingMatchesHappenSooner();
   gettimeofday(&constGenEnd, NULL);
   getTimeElapsed(constGenStart, constGenEnd);
   
