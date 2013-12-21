@@ -1,3 +1,11 @@
+In order to run MOPPER with SPO or FM encoding, set up an environment variable ENCODINGTYPE in your
+.bashrc file. Choose an encoding and assigning the following values to the env. variable 
+
+a) for FM encoding: ENCODINGTYPE=fmEnc
+b) for PLDI/SPO encoding: ENCODINGTYPE=pldiEnc
+
+=======
+
 1) MPICC should be installed on the system. An easy way to install MPICC is by installing
 MPICH2.  
 
@@ -19,5 +27,6 @@ autoreconf --force
 ./configure --prefix="Some Directory"
 make
 make install
+
 
 ***
