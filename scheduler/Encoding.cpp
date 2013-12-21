@@ -1,6 +1,6 @@
 #include "Encoding.hpp"
 #include "util/threeval.h"
-#include "solver-src/sat/cardinality.h"
+//#include "solver-src/sat/cardinality.h"
 
 
 std::stringstream formula;
@@ -2042,15 +2042,14 @@ void poEncoding::processPO()
     forall_transitions(titer, (*iter)->_tlist){
       Envelope * envA = (*titer).GetEnvelope();
       CB A(envA->id, envA->index);
-      // for(std::vector<int>::iterator vit = (*titer).get_ancestors().begin();
-      // 	  vit != (*titer).get_ancestors().end(); vit ++){
-      // 	CB B (envA->id, *vit);
-      // 	Envelope * envB = last_node->GetTransition(B)->GetEnvelope();
-      // 	if(envB->func_id == FINALIZE) continue;
-      forall_transitions(titerN, (*iter)->_tlist){
-	Envelope * envB = (*titerN).GetEnvelope();
-	CB B (envB->id, envB->index);
-	if(last_node->isAncestor(A,B)){
+      for(std::vector<int>::iterator vit = (*titer).get_ancestors().begin();
+      	  vit != (*titer).get_ancestors().end(); vit ++){
+      	CB B (envA->id, *vit);
+      	Envelope * envB = last_node->GetTransition(B)->GetEnvelope();
+	// forall_transitions(titerN, (*iter)->_tlist){
+	// 	Envelope * envB = (*titerN).GetEnvelope();
+	// 	CB B (envB->id, envB->index);
+	// 	if(last_node->isAncestor(A,B)){
 	bvt Abv, Bbv;
 	
 	Abv = getBVLiterals(A);
@@ -2058,7 +2057,6 @@ void poEncoding::processPO()
 	
 	literalt c_ba = bvUtils.unsigned_less_than(Bbv, Abv);
 	slv.l_set_to(c_ba, true); // PPO constraint
-	}
       }
     }
   }
@@ -2161,50 +2159,50 @@ literalt poEncoding::predsMatched(CB q)
 {
   bvt lst;
   formula << "(";
-  forall_transitionLists(iter, last_node->_tlist){
-    forall_transitions(titer, (*iter)->_tlist){
-      Envelope *envP  = (*titer).GetEnvelope();
-      CB p(envP->id, envP->index);
-      if(last_node->isAncestor(q,p)){
-	// P is send/recv
-	if(envP->isSendType() || envP->isRecvType()){
-	  bvt tmp;
-	  forall_matchSet(mit, matchSet){
-	    CB Mf = (**mit).front();
-	    CB Mb = (**mit).back();
-	    if((p == Mf) || (p == Mb)){
-	      literalt X_m = getMatchLiteral(*mit);
-	      tmp.push_back(X_m);
-	    }
-	  }
-	  if(!tmp.empty()){
-	    formula << "(";
-	    for(bvt::iterator bit = tmp.begin(); 
-		bit != tmp.end(); bit++){
-	      formula << getLitName((*bit), 0) << " | "; 
-	    }
-	    formula << ") & ";
-	    lst.push_back(slv.lor(tmp));
-	  }
-	}
-	if(envP->isCollectiveType()){
-	  MatchPtr m = getMPtr(p);
-	  literalt X_l = getMatchLiteral(m);
-	  formula << getLitName(X_l, 0) << " & "; 
-	  lst.push_back(X_l);
-	}
-	if(envP->isWaitorTestType()){
-	  literalt X_w = getFinalizeWaitLiterals(p);
-	  formula << getLitName(X_w, 1) << " & "; 
-	  lst.push_back(X_w);
+  // forall_transitionLists(iter, last_node->_tlist){
+  //   forall_transitions(titer, (*iter)->_tlist){
+  Transition *qT = last_node->GetTransition(q);
+  for(std::vector<int>::iterator vit = qT->get_ancestors().begin();
+      vit != qT->get_ancestors().end(); vit ++){
+    
+    CB p(q._pid, (*vit));
+    Envelope *envP  = last_node->GetTransition(p)->GetEnvelope();
+    // P is send/recv
+    if(envP->isSendType() || envP->isRecvType()){
+      bvt tmp;
+      forall_matchSet(mit, matchSet){
+	CB Mf = (**mit).front();
+	CB Mb = (**mit).back();
+	if((p == Mf) || (p == Mb)){
+	  literalt X_m = getMatchLiteral(*mit);
+	  tmp.push_back(X_m);
 	}
       }
+      if(!tmp.empty()){
+	formula << "(";
+	for(bvt::iterator bit = tmp.begin(); 
+	    bit != tmp.end(); bit++){
+	  formula << getLitName((*bit), 0) << " | "; 
+	}
+	formula << ") & ";
+	lst.push_back(slv.lor(tmp));
+      }
+    }
+    if(envP->isCollectiveType()){
+      MatchPtr m = getMPtr(p);
+      literalt X_l = getMatchLiteral(m);
+      formula << getLitName(X_l, 0) << " & "; 
+      lst.push_back(X_l);
+    }
+    if(envP->isWaitorTestType()){
+      literalt X_w = getFinalizeWaitLiterals(p);
+      formula << getLitName(X_w, 1) << " & "; 
+      lst.push_back(X_w);
     }
   }
   if(!lst.empty()){
     formula << ")"; 
     return slv.land(lst);
-    
   }
   formula << "one)"; 
   return one;
@@ -3036,7 +3034,7 @@ void Encoding3::createUniqueMatchConstraint()
 void Encoding3::uniqueMatchSend()
 {
   literalt s_m;
-  bvt lst; 
+  //bvt lst; 
   formula << "****UniqueMatchSend****" << std::endl; 
   slv.constraintStream << "****UniqueMatchSend****" << std::endl; 
   forall_matchSet(mit, matchSet){
@@ -3045,7 +3043,7 @@ void Encoding3::uniqueMatchSend()
     if(last_node->GetTransition(send)->GetEnvelope()->isSendType()) {
       s_m = getMatchLiteral(*mit);
       assert((**mit).size() == 2);
-      lst.push_back(s_m);
+      //lst.push_back(s_m);
       //std::cout << s_m.dimacs() << std::endl;
       std::set<CB> image = _m->MImage(send);
      for(std::set<CB>::iterator sit = image.begin(); 
@@ -3054,31 +3052,32 @@ void Encoding3::uniqueMatchSend()
 	  std::stringstream ss;
 	  ss << send._pid << send._index << (*sit)._pid << (*sit)._index;
 	  literalt s_n = matchMap.find(ss.str())->second;
-	  lst.push_back(s_n);
+	  // lst.push_back(s_n);
 	  //std::cout << s_n.dimacs() << std::endl;
 	  // slv.l_set_to(slv.limplies(s_m, slv.lnot(s_n)), true);
 	  // formula << "((" << getLitName(s_m, 0) 
 	  // 	  << " & " << getClkLitName(c_recv_recv, *sit, recv)
 	  // 	  << ") -> " << getClkLitName(c_recv_send, *sit, send)
 	  // 	  << ") &" <<std::endl;
+	  slv.l_set_to(slv.limplies(s_m, slv.lnot(s_n)), true);
 	}
       }
-     formulat formula;
-     binomial_encodingt be(slv);
-     be.atmostk(lst, 1, formula);
+     // formulat formula;
+     // binomial_encodingt be(slv);
+     // be.atmostk(lst, 1, formula);
      // std::cout <<" ----- formula ---- " << std::endl;
      // be.print_formula(std::cout,formula);
      // std::cout <<" ----- end formula ---- " << std::endl;
-     be.add_to_prop(formula);
+     //     be.add_to_prop(formula);
     }
-        lst.clear();
+    // lst.clear();
   }
 }
 
 void Encoding3::uniqueMatchRecv()
 {
   literalt s_m;
-  bvt lst;
+  //bvt lst;
   formula << "****UniqueMatchSend****" << std::endl; 
   slv.constraintStream << "****UniqueMatchSend****" << std::endl; 
   forall_matchSet(mit, matchSet){
@@ -3087,7 +3086,7 @@ void Encoding3::uniqueMatchRecv()
     if(last_node->GetTransition(send)->GetEnvelope()->isSendType()) {
       s_m = getMatchLiteral(*mit);
       assert((**mit).size() == 2);
-      lst.push_back(s_m);
+      //  lst.push_back(s_m);
       std::set<CB> image = _m->MImage(recv);
      for(std::set<CB>::iterator sit = image.begin(); 
 	  sit != image.end(); sit++){
@@ -3095,20 +3094,20 @@ void Encoding3::uniqueMatchRecv()
 	 std::stringstream ss;
 	  ss << (*sit)._pid << (*sit)._index << recv._pid << recv._index;
 	  literalt s_n = matchMap.find(ss.str())->second;
-	  lst.push_back(s_n);
-	  //slv.l_set_to(slv.limplies(s_m, slv.lnot(s_n)), true);
+	  //  lst.push_back(s_n);
+	  slv.l_set_to(slv.limplies(s_m, slv.lnot(s_n)), true);
 	  // formula << "((" << getLitName(s_m, 0) 
 	  // 	  << " & " << getClkLitName(c_recv_recv, *sit, recv)
 	  // 	  << ") -> " << getClkLitName(c_recv_send, *sit, send)
 	  // 	  << ") &" <<std::endl;
 	}
      }
-     formulat formula;
-     binomial_encodingt be(slv);
-     be.atmostk(lst, 1, formula); 
-     be.add_to_prop(formula);
+     // formulat formula;
+     // binomial_encodingt be(slv);
+     // be.atmostk(lst, 1, formula); 
+     // be.add_to_prop(formula);
     }
-    lst.clear();
+    //    lst.clear();
   }
 }
 

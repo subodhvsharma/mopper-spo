@@ -82,12 +82,12 @@ DIST_SOURCES =
 CLASSPATH_ENV = CLASSPATH=$(JAVAROOT):$(srcdir)/$(JAVAROOT)$${CLASSPATH:+":$$CLASSPATH"}
 am__java_sources = $(src_JAVA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ACLOCAL = ${SHELL} /home/ssharma/svs-research/isp-versions/isp-predictive-binary/missing --run aclocal-1.11
+ACLOCAL = ${SHELL} /nas/ssharma/svs-research/isp-versions/isp-predictive-binary/missing --run aclocal-1.11
 AMTAR = $${TAR-tar}
 AR = ar
-AUTOCONF = ${SHELL} /home/ssharma/svs-research/isp-versions/isp-predictive-binary/missing --run autoconf
-AUTOHEADER = ${SHELL} /home/ssharma/svs-research/isp-versions/isp-predictive-binary/missing --run autoheader
-AUTOMAKE = ${SHELL} /home/ssharma/svs-research/isp-versions/isp-predictive-binary/missing --run automake-1.11
+AUTOCONF = ${SHELL} /nas/ssharma/svs-research/isp-versions/isp-predictive-binary/missing --run autoconf
+AUTOHEADER = ${SHELL} /nas/ssharma/svs-research/isp-versions/isp-predictive-binary/missing --run autoheader
+AUTOMAKE = ${SHELL} /nas/ssharma/svs-research/isp-versions/isp-predictive-binary/missing --run automake-1.11
 AWK = gawk
 BINDIR = /home/ssharma/svs-research/isp-versions/isp-predictive-binary/bin
 CC = gcc
@@ -119,9 +119,9 @@ INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
-JAR = /usr/lib/jvm/java-1.6.0-openjdk-amd64/bin/jar
-JAVA = /usr/lib/jvm/java-1.6.0-openjdk-amd64/jre/bin/java
-JAVAC = /usr/lib/jvm/java-1.6.0-openjdk-amd64/bin/javac
+JAR = /usr/bin/jar
+JAVA = /usr/bin/java
+JAVAC = javac
 LD = /usr/bin/ld -m elf_x86_64
 LDFLAGS = 
 LIBDIR = /home/ssharma/svs-research/isp-versions/isp-predictive-binary/lib
@@ -136,7 +136,7 @@ LIPO =
 LN_S = ln -s
 LTLIBOBJS = 
 MAINT = #
-MAKEINFO = ${SHELL} /home/ssharma/svs-research/isp-versions/isp-predictive-binary/missing --run makeinfo
+MAKEINFO = ${SHELL} /nas/ssharma/svs-research/isp-versions/isp-predictive-binary/missing --run makeinfo
 MANIFEST_TOOL = :
 MKDIR_P = /bin/mkdir -p
 MPICC = /usr/bin/mpicc
@@ -164,10 +164,10 @@ SET_MAKE =
 SHELL = /bin/bash
 STRIP = strip
 VERSION = 0.2.0
-abs_builddir = /home/ssharma/svs-research/isp-versions/isp-predictive-binary/UI
-abs_srcdir = /home/ssharma/svs-research/isp-versions/isp-predictive-binary/UI
-abs_top_builddir = /home/ssharma/svs-research/isp-versions/isp-predictive-binary
-abs_top_srcdir = /home/ssharma/svs-research/isp-versions/isp-predictive-binary
+abs_builddir = /nas/ssharma/svs-research/isp-versions/isp-predictive-binary/UI
+abs_srcdir = /nas/ssharma/svs-research/isp-versions/isp-predictive-binary/UI
+abs_top_builddir = /nas/ssharma/svs-research/isp-versions/isp-predictive-binary
+abs_top_srcdir = /nas/ssharma/svs-research/isp-versions/isp-predictive-binary
 ac_ct_AR = ar
 ac_ct_CC = gcc
 ac_ct_CXX = g++
@@ -198,10 +198,10 @@ htmldir = ${docdir}
 include_ispdir = /home/ssharma/svs-research/isp-versions/isp-predictive-binary/include/isp
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /home/ssharma/svs-research/isp-versions/isp-predictive-binary/install-sh
-jar = /usr/lib/jvm/java-1.6.0-openjdk-amd64/bin/jar
-java = /usr/lib/jvm/java-1.6.0-openjdk-amd64/jre/bin/java
-javac = /usr/lib/jvm/java-1.6.0-openjdk-amd64/bin/javac
+install_sh = ${SHELL} /nas/ssharma/svs-research/isp-versions/isp-predictive-binary/install-sh
+jar = /usr/bin/jar
+java = /usr/bin/java
+javac = javac
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -503,10 +503,10 @@ uninstall-am: uninstall-binSCRIPTS uninstall-srcJAVA
 
 ispui.jar: classsrc.stamp
 	-rm -rf org com ispui.jar
-	/usr/lib/jvm/java-1.6.0-openjdk-amd64/bin/jar xf lib/log4j-1.2.15.jar org
-	/usr/lib/jvm/java-1.6.0-openjdk-amd64/bin/jar xf lib/syntax.jar com
-	/usr/lib/jvm/java-1.6.0-openjdk-amd64/bin/jar xf lib/jgraph.jar org
-	/usr/lib/jvm/java-1.6.0-openjdk-amd64/bin/jar cfm ispui.jar manifest.txt Data/*.class Graph/*.class UI/*.class Parser/*.class org com
+	/usr/bin/jar xf lib/log4j-1.2.15.jar org
+	/usr/bin/jar xf lib/syntax.jar com
+	/usr/bin/jar xf lib/jgraph.jar org
+	/usr/bin/jar cfm ispui.jar manifest.txt Data/*.class Graph/*.class UI/*.class Parser/*.class org com
 	-rm -rf org com
 
 install-srcJAVA:

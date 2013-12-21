@@ -73,13 +73,13 @@ endif
 
 SRC =  $(MINISAT2_SRC) \
       sat/cnf.cpp \
-      sat/cardinality.cpp \
       prop/prop.cpp \
       prop/prop_assignment.cpp \
       ../util/i2string.cpp \
       ../util/threeval.cpp \
       ../util/mp_arith.cpp \
       flattening/bv_utils.cpp 
+#   sat/cardinality.cpp \	
 
 
 INCLUDES= -I .. \

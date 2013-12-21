@@ -52,6 +52,7 @@
 /* svs -- SAT solving begin */
 #include "Encoding.hpp"
 #include "utility.hpp"
+#include "stdlib.h"
 /* svs -- SAT solving end */
 
 Scheduler * Scheduler::_instance = NULL;
@@ -646,9 +647,36 @@ void Scheduler::StartMC () {
     //   // 	generateErrorTrace();
     //   // }
     // }
+
+    //[svs] assumes you have an env. var defined for 
+    // encoding type called ENCODINGTYPE to the following
+    // two values: 
+    // 1) for FM encoding ENCODINGTYPE=fmEnc
+    // 2) for PLDI encodin ENCODINGTYPE=pldiEnc
     
-    spo = new poEncoding(it, m);
-    spo->poEnc();
+    char const * encType = getenv("ENCODINGTYPE");
+    if (encType ==NULL){
+      std::cout << "Environment variable ENCODINGTYPE is not set .. exiting" <<std::endl;
+      exit(0);
+    }
+    else{
+      std::string eType(encType);
+      if (eType.compare("fmEnc") == 0){
+	std::cout << "Executing the FM encoding" <<std::endl;
+	e3 = new Encoding3(it, m); 
+	e3->encodingPartialOrders();
+      }
+      else if (eType.compare("pldiEnc") == 0){
+	std::cout << "Executing the SPO encoding" <<std::endl;
+	spo = new poEncoding(it, m);
+	spo->poEnc();
+      }
+      else {
+	std::cout << "ENCODINGTYPE is not set to either fmEnc or pldiEnc"
+		  <<std::endl;
+	exit(0);
+      }
+    }
 
     ExitMpiProcessAndWait (true);
     
