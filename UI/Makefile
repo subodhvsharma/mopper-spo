@@ -82,14 +82,14 @@ DIST_SOURCES =
 CLASSPATH_ENV = CLASSPATH=$(JAVAROOT):$(srcdir)/$(JAVAROOT)$${CLASSPATH:+":$$CLASSPATH"}
 am__java_sources = $(src_JAVA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ACLOCAL = ${SHELL} /nas/ssharma/svs-research/isp-versions/isp-predictive-binary/missing --run aclocal-1.11
+ACLOCAL = ${SHELL} /home/scratch/dlock/fm14/mopper-spo/missing --run aclocal-1.11
 AMTAR = $${TAR-tar}
 AR = ar
-AUTOCONF = ${SHELL} /nas/ssharma/svs-research/isp-versions/isp-predictive-binary/missing --run autoconf
-AUTOHEADER = ${SHELL} /nas/ssharma/svs-research/isp-versions/isp-predictive-binary/missing --run autoheader
-AUTOMAKE = ${SHELL} /nas/ssharma/svs-research/isp-versions/isp-predictive-binary/missing --run automake-1.11
+AUTOCONF = ${SHELL} /home/scratch/dlock/fm14/mopper-spo/missing --run autoconf
+AUTOHEADER = ${SHELL} /home/scratch/dlock/fm14/mopper-spo/missing --run autoheader
+AUTOMAKE = ${SHELL} /home/scratch/dlock/fm14/mopper-spo/missing --run automake-1.11
 AWK = gawk
-BINDIR = /home/ssharma/svs-research/isp-versions/isp-predictive-binary/bin
+BINDIR = /home/scratch/dlock/fm14/mopper-spo/install/bin
 CC = gcc
 CCDEPMODE = depmode=gcc3
 CFLAGS = -g -O2 -DFIB -DCONFIG_OPTIONAL_AMPLE_SET_FIX
@@ -113,18 +113,18 @@ EXEEXT =
 FGREP = /bin/grep -F
 FUNCTION_NAME_VAR = __PRETTY_FUNCTION__
 GREP = /bin/grep
-INCDIR = /home/ssharma/svs-research/isp-versions/isp-predictive-binary/include/isp
+INCDIR = /home/scratch/dlock/fm14/mopper-spo/install/include/isp
 INSTALL = /usr/bin/install -c
 INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
-JAR = /usr/bin/jar
-JAVA = /usr/bin/java
-JAVAC = javac
+JAR = /usr/local/bin/jar
+JAVA = /usr/local/bin/java
+JAVAC = /usr/local/bin/javac
 LD = /usr/bin/ld -m elf_x86_64
 LDFLAGS = 
-LIBDIR = /home/ssharma/svs-research/isp-versions/isp-predictive-binary/lib
+LIBDIR = /home/scratch/dlock/fm14/mopper-spo/install/lib
 LIBOBJS = 
 LIBOPTS_CFLAGS = -I$(top_srcdir)/libopts
 LIBOPTS_DIR = libopts
@@ -136,14 +136,14 @@ LIPO =
 LN_S = ln -s
 LTLIBOBJS = 
 MAINT = #
-MAKEINFO = ${SHELL} /nas/ssharma/svs-research/isp-versions/isp-predictive-binary/missing --run makeinfo
+MAKEINFO = ${SHELL} /home/scratch/dlock/fm14/mopper-spo/missing --run makeinfo
 MANIFEST_TOOL = :
 MKDIR_P = /bin/mkdir -p
-MPICC = /usr/bin/mpicc
-MPICXX = /usr/bin/mpicxx
-MPIDIR = /usr
-MPI_BINDIR = /usr/bin
-MPI_INCDIR = /usr/include/mpich2/
+MPICC = /usr/lib64/openmpi/bin//mpicc
+MPICXX = /usr/lib64/openmpi/bin//mpicxx
+MPIDIR = 
+MPI_BINDIR = /bin
+MPI_INCDIR = /usr/include/openmpi-x86_64/
 NM = /usr/bin/nm -B
 NMEDIT = 
 OBJDUMP = objdump
@@ -161,13 +161,13 @@ PATH_SEPARATOR = :
 RANLIB = ranlib
 SED = /bin/sed
 SET_MAKE = 
-SHELL = /bin/bash
+SHELL = /bin/sh
 STRIP = strip
 VERSION = 0.2.0
-abs_builddir = /nas/ssharma/svs-research/isp-versions/isp-predictive-binary/UI
-abs_srcdir = /nas/ssharma/svs-research/isp-versions/isp-predictive-binary/UI
-abs_top_builddir = /nas/ssharma/svs-research/isp-versions/isp-predictive-binary
-abs_top_srcdir = /nas/ssharma/svs-research/isp-versions/isp-predictive-binary
+abs_builddir = /home/scratch/dlock/fm14/mopper-spo/UI
+abs_srcdir = /home/scratch/dlock/fm14/mopper-spo/UI
+abs_top_builddir = /home/scratch/dlock/fm14/mopper-spo
+abs_top_srcdir = /home/scratch/dlock/fm14/mopper-spo
 ac_ct_AR = ar
 ac_ct_CC = gcc
 ac_ct_CXX = g++
@@ -195,25 +195,25 @@ host_cpu = x86_64
 host_os = linux-gnu
 host_vendor = unknown
 htmldir = ${docdir}
-include_ispdir = /home/ssharma/svs-research/isp-versions/isp-predictive-binary/include/isp
+include_ispdir = /home/scratch/dlock/fm14/mopper-spo/install/include/isp
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /nas/ssharma/svs-research/isp-versions/isp-predictive-binary/install-sh
-jar = /usr/bin/jar
-java = /usr/bin/java
-javac = javac
+install_sh = ${SHELL} /home/scratch/dlock/fm14/mopper-spo/install-sh
+jar = /usr/local/bin/jar
+java = /usr/local/bin/java
+javac = /usr/local/bin/javac
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
 localstatedir = ${prefix}/var
 mandir = ${datarootdir}/man
 mkdir_p = /bin/mkdir -p
-mpi_dir = /usr
-mpicc = /usr/bin/mpicc
-mpicxx = /usr/bin/mpicxx
+mpi_dir = 
+mpicc = /usr/lib64/openmpi/bin//mpicc
+mpicxx = /usr/lib64/openmpi/bin//mpicxx
 oldincludedir = /usr/include
 pdfdir = ${docdir}
-prefix = /home/ssharma/svs-research/isp-versions/isp-predictive-binary
+prefix = /home/scratch/dlock/fm14/mopper-spo/install
 program_transform_name = s,x,x,
 psdir = ${docdir}
 sbindir = ${exec_prefix}/sbin
@@ -503,10 +503,10 @@ uninstall-am: uninstall-binSCRIPTS uninstall-srcJAVA
 
 ispui.jar: classsrc.stamp
 	-rm -rf org com ispui.jar
-	/usr/bin/jar xf lib/log4j-1.2.15.jar org
-	/usr/bin/jar xf lib/syntax.jar com
-	/usr/bin/jar xf lib/jgraph.jar org
-	/usr/bin/jar cfm ispui.jar manifest.txt Data/*.class Graph/*.class UI/*.class Parser/*.class org com
+	/usr/local/bin/jar xf lib/log4j-1.2.15.jar org
+	/usr/local/bin/jar xf lib/syntax.jar com
+	/usr/local/bin/jar xf lib/jgraph.jar org
+	/usr/local/bin/jar cfm ispui.jar manifest.txt Data/*.class Graph/*.class UI/*.class Parser/*.class org com
 	-rm -rf org com
 
 install-srcJAVA:

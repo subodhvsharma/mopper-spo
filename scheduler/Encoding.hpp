@@ -6,7 +6,17 @@
 #include <map>
 #include "utility.hpp"
 #include "solver-src/flattening/bv_utils.h"
+
+#define LINGELING
+//#define MINISAT2
+
+#ifdef LINGELING
+#include <solver-src/sat/satcheck_lingeling.h>
+#endif
+
+#ifdef MINISAT2
 #include <solver-src/sat/satcheck_minisat2.h>
+#endif
 
 typedef std::list<CB> * MatchPtr; 
 typedef std::list<CB>  Match; 
@@ -19,8 +29,15 @@ typedef Match::iterator LIter;
 typedef std::vector<TransitionList *>::iterator TLIter;
 typedef std::vector<Transition>::iterator TIter;
 
+#ifdef LINGELING
+typedef  satcheck_lingelingt satcheckt;
+typedef  satcheck_lingelingt satcheck_simplifiert;
+#endif
+
+#ifdef MINISAT2
 typedef satcheck_minisat_no_simplifiert satcheckt;
 typedef satcheck_minisat_simplifiert satcheck_simplifiert;
+#endif
 
 #define forall_matchSet(it, MT) \
   for (MIter it = MT.begin(), it_end = MT.end(); \

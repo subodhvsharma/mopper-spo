@@ -64,14 +64,15 @@ endif
 #   CP_CXXFLAGS += -DHAVE_PICOSAT
 # endif
 
-# ifneq ($(LINGELING),)
-#   LINGELING_SRC=sat/satcheck_lingeling.cpp
-#   LINGELING_INCLUDE=-I $(LINGELING)
-#   LINGELING_LIB=$(LINGELING)/liblgl$(LIBEXT)
-#   CP_CXXFLAGS += -DHAVE_LINGELING
-# endif
+ ifneq ($(LINGELING),)
+   LINGELING_SRC=sat/satcheck_lingeling.cpp
+   LINGELING_INCLUDE=-I $(LINGELING)
+   LINGELING_LIB=$(LINGELING)/liblgl$(LIBEXT)
+   CP_CXXFLAGS += -DHAVE_LINGELING
+ endif
 
-SRC =  $(MINISAT2_SRC) \
+SRC = $(LINGELING_SRC) \
+	  $(MINISAT2_SRC) \
       sat/cnf.cpp \
       prop/prop.cpp \
       prop/prop_assignment.cpp \
@@ -83,7 +84,8 @@ SRC =  $(MINISAT2_SRC) \
 
 
 INCLUDES= -I .. \
-	 $(MINISAT2_INCLUDE) \
+	$(LINGELING_INCLUDE) \
+	$(MINISAT2_INCLUDE) 
 
 CLEANFILES = solvers$(LIBEXT)
 
@@ -104,6 +106,7 @@ all: solvers$(LIBEXT)
 ###############################################################################
 
 solvers$(LIBEXT): $(OBJ) \
+        $(LINGELING_LIB) \
         $(MINISAT2_LIB) 
 	$(LINKLIB)
 

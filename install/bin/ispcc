@@ -11,4 +11,4 @@
 # See LICENSE for licensing information
 #
 
-exec "/uusoc/res/uv/svs/mpich2-install/bin/mpicc" "-L/uusoc/res/uv/svs/isp-predictive/install/lib" "-I/uusoc/res/uv/svs/isp-predictive/install/include/isp" -Wl,-rpath=/uusoc/res/uv/svs/isp-predictive/install/lib -include isp.h $* -lisp_prof
+exec "/usr/lib64/openmpi/bin//mpicc" "-L/home/scratch/dlock/fm14/mopper-spo/install/lib" "-I/home/scratch/dlock/fm14/mopper-spo/install/include/isp" -Wl,-rpath=/home/scratch/dlock/fm14/mopper-spo/install/lib -include isp.h $* -lisp_prof

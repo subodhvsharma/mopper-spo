@@ -1,18 +1,18 @@
 libopts_la-libopts.lo: libopts.c compat/compat.h config.h \
  /usr/include/sys/types.h /usr/include/features.h \
- /usr/include/bits/predefs.h /usr/include/sys/cdefs.h \
- /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
- /usr/include/gnu/stubs-64.h /usr/include/bits/types.h \
- /usr/include/bits/typesizes.h /usr/include/time.h \
- /usr/lib/gcc/x86_64-linux-gnu/4.4.3/include/stddef.h \
+ /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h \
+ /usr/include/gnu/stubs.h /usr/include/gnu/stubs-64.h \
+ /usr/include/bits/types.h /usr/include/bits/typesizes.h \
+ /usr/include/time.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h \
  /usr/include/endian.h /usr/include/bits/endian.h \
  /usr/include/bits/byteswap.h /usr/include/sys/select.h \
  /usr/include/bits/select.h /usr/include/bits/sigset.h \
  /usr/include/bits/time.h /usr/include/sys/sysmacros.h \
  /usr/include/bits/pthreadtypes.h /usr/include/sys/mman.h \
  /usr/include/bits/mman.h /usr/include/sys/param.h \
- /usr/lib/gcc/x86_64-linux-gnu/4.4.3/include-fixed/limits.h \
- /usr/lib/gcc/x86_64-linux-gnu/4.4.3/include-fixed/syslimits.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/limits.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/syslimits.h \
  /usr/include/limits.h /usr/include/bits/posix1_lim.h \
  /usr/include/bits/local_lim.h /usr/include/linux/limits.h \
  /usr/include/bits/posix2_lim.h /usr/include/bits/xopen_lim.h \
@@ -27,32 +27,30 @@ libopts_la-libopts.lo: libopts.c compat/compat.h config.h \
  /usr/include/bits/waitflags.h /usr/include/bits/waitstatus.h \
  /usr/include/stdio.h /usr/include/libio.h /usr/include/_G_config.h \
  /usr/include/wchar.h \
- /usr/lib/gcc/x86_64-linux-gnu/4.4.3/include/stdarg.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h \
  /usr/include/bits/sys_errlist.h /usr/include/bits/stdio.h \
- /usr/include/bits/stdio2.h /usr/include/assert.h /usr/include/ctype.h \
- /usr/include/xlocale.h /usr/include/dirent.h /usr/include/bits/dirent.h \
- /usr/include/errno.h /usr/include/bits/errno.h \
- /usr/include/linux/errno.h /usr/include/asm/errno.h \
- /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
- /usr/include/fcntl.h /usr/include/bits/fcntl.h /usr/include/bits/uio.h \
- /usr/include/bits/fcntl2.h /usr/include/memory.h /usr/include/string.h \
- /usr/include/bits/string.h /usr/include/bits/string2.h \
- /usr/include/stdlib.h /usr/include/bits/string3.h /usr/include/setjmp.h \
- /usr/include/bits/setjmp.h /usr/include/bits/setjmp2.h \
+ /usr/include/assert.h /usr/include/ctype.h /usr/include/xlocale.h \
+ /usr/include/dirent.h /usr/include/bits/dirent.h /usr/include/errno.h \
+ /usr/include/bits/errno.h /usr/include/linux/errno.h \
+ /usr/include/asm/errno.h /usr/include/asm-generic/errno.h \
+ /usr/include/asm-generic/errno-base.h /usr/include/fcntl.h \
+ /usr/include/bits/fcntl.h /usr/include/bits/uio.h /usr/include/memory.h \
+ /usr/include/string.h /usr/include/bits/string.h \
+ /usr/include/bits/string2.h /usr/include/stdlib.h /usr/include/setjmp.h \
+ /usr/include/bits/setjmp.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdint.h \
  /usr/include/stdint.h /usr/include/bits/wchar.h /usr/include/alloca.h \
- /usr/include/bits/stdlib.h /usr/include/utime.h /usr/include/unistd.h \
+ /usr/include/bits/timex.h /usr/include/utime.h /usr/include/unistd.h \
  /usr/include/bits/posix_opt.h /usr/include/bits/environments.h \
- /usr/include/bits/confname.h /usr/include/getopt.h \
- /usr/include/bits/unistd.h autoopts/options.h /usr/include/sysexits.h \
- autoopts/usage-txt.h genshell.h autoopts/options.h xat-attribute.h \
- value-type.h ag-char-map.h /usr/include/inttypes.h autoopts.h proto.h \
- value-type.c xat-attribute.c autoopts.c compat/pathfind.c \
- compat/compat.h boolean.c configfile.c cook.c enumeration.c \
- environment.c file.c genshell.c load.c makeshell.c nested.c numeric.c \
- pgusage.c putshell.c reset.c restore.c save.c sort.c stack.c \
- /usr/include/regex.h /usr/include/gnu/option-groups.h streqvcmp.c \
- text_mmap.c tokenize.c time.c parse-duration.c parse-duration.h usage.c \
- version.c
+ /usr/include/bits/confname.h /usr/include/getopt.h autoopts/options.h \
+ /usr/include/sysexits.h autoopts/usage-txt.h genshell.h \
+ autoopts/options.h xat-attribute.h value-type.h ag-char-map.h \
+ /usr/include/inttypes.h autoopts.h proto.h value-type.c xat-attribute.c \
+ autoopts.c compat/pathfind.c compat/compat.h boolean.c configfile.c \
+ cook.c enumeration.c environment.c file.c genshell.c load.c makeshell.c \
+ nested.c numeric.c pgusage.c putshell.c reset.c restore.c save.c sort.c \
+ stack.c /usr/include/regex.h streqvcmp.c text_mmap.c tokenize.c time.c \
+ parse-duration.c parse-duration.h usage.c version.c
 
 compat/compat.h:
 
@@ -61,8 +59,6 @@ config.h:
 /usr/include/sys/types.h:
 
 /usr/include/features.h:
-
-/usr/include/bits/predefs.h:
 
 /usr/include/sys/cdefs.h:
 
@@ -78,7 +74,7 @@ config.h:
 
 /usr/include/time.h:
 
-/usr/lib/gcc/x86_64-linux-gnu/4.4.3/include/stddef.h:
+/usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h:
 
 /usr/include/endian.h:
 
@@ -104,9 +100,9 @@ config.h:
 
 /usr/include/sys/param.h:
 
-/usr/lib/gcc/x86_64-linux-gnu/4.4.3/include-fixed/limits.h:
+/usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/limits.h:
 
-/usr/lib/gcc/x86_64-linux-gnu/4.4.3/include-fixed/syslimits.h:
+/usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/syslimits.h:
 
 /usr/include/limits.h:
 
@@ -166,13 +162,11 @@ config.h:
 
 /usr/include/wchar.h:
 
-/usr/lib/gcc/x86_64-linux-gnu/4.4.3/include/stdarg.h:
+/usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h:
 
 /usr/include/bits/sys_errlist.h:
 
 /usr/include/bits/stdio.h:
-
-/usr/include/bits/stdio2.h:
 
 /usr/include/assert.h:
 
@@ -202,8 +196,6 @@ config.h:
 
 /usr/include/bits/uio.h:
 
-/usr/include/bits/fcntl2.h:
-
 /usr/include/memory.h:
 
 /usr/include/string.h:
@@ -214,13 +206,11 @@ config.h:
 
 /usr/include/stdlib.h:
 
-/usr/include/bits/string3.h:
-
 /usr/include/setjmp.h:
 
 /usr/include/bits/setjmp.h:
 
-/usr/include/bits/setjmp2.h:
+/usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdint.h:
 
 /usr/include/stdint.h:
 
@@ -228,7 +218,7 @@ config.h:
 
 /usr/include/alloca.h:
 
-/usr/include/bits/stdlib.h:
+/usr/include/bits/timex.h:
 
 /usr/include/utime.h:
 
@@ -241,8 +231,6 @@ config.h:
 /usr/include/bits/confname.h:
 
 /usr/include/getopt.h:
-
-/usr/include/bits/unistd.h:
 
 autoopts/options.h:
 
@@ -313,8 +301,6 @@ sort.c:
 stack.c:
 
 /usr/include/regex.h:
-
-/usr/include/gnu/option-groups.h:
 
 streqvcmp.c:
 

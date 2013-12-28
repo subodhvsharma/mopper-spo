@@ -11,4 +11,4 @@
 # See LICENSE for licensing information
 #
 
-exec "/usr/bin/mpicxx" "-L/home/ssharma/svs-research/isp-versions/isp-predictive-binary/lib" "-I/home/ssharma/svs-research/isp-versions/isp-predictive-binary/include/isp" -Wl,-rpath=/home/ssharma/svs-research/isp-versions/isp-predictive-binary/lib -include isp.h $* -lisp_prof
+exec "/usr/lib64/openmpi/bin//mpicxx" "-L/home/scratch/dlock/fm14/mopper-spo/install/lib" "-I/home/scratch/dlock/fm14/mopper-spo/install/include/isp" -Wl,-rpath=/home/scratch/dlock/fm14/mopper-spo/install/lib -include isp.h $* -lisp_prof

@@ -7,11 +7,11 @@ BUILD_ENV = AUTO
 # SAT-solvers we have
 #PRECOSAT = ../../precosat-576-7e5e66f-120112
 #PICOSAT = ../../picosat-936
-#LINGELING = ../../lingeling-587f-4882048-110513
+LINGELING = ../../lingeling-ats-57807c8-131016
 #CHAFF = ../../zChaff
 #BOOLEFORCE = ../../booleforce-0.4
 #MINISAT = ../../MiniSat-p_v1.14
-MINISAT2 = ../../minisat-2.2.0
+#MINISAT2 = ../../minisat-2.2.0
 #GLUCOSE = ../../glucose2.2
 #SMVSAT =
 
