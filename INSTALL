@@ -11,12 +11,14 @@ MPICH2.
 
 2) Install the solver
    a) Go to the solver directory
+   b) Choose the solver in config.inc
    b) make
 
 3) Install ISP+MOPPER 
-./configure --prefix="Some Directory" --disable-gui --enable-optional-ample-set-fix --with-mpi-inc-dir=<path to mpi.h file>
-make
-make install
+  a) ./configure --prefix="Some Directory" --disable-gui --enable-optional-ample-set-fix --with-mpi-inc-dir=<path to mpi.h file>
+  b) make
+  c) edit scheduler/Encoding.hpp to fix the solver
+  d) make install
 
 NOTE: The implementation is tested on Linux 2.6.32-51 and  3.2.0-51 (Ubuntu 12.04) with GCC version 4.4.3 and 4.6.3.
 
