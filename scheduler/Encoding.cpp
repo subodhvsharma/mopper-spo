@@ -2066,6 +2066,9 @@ void poEncoding:: init()
 {
   formula << "****init****" << std::endl; 
   bool AhasanAncestor = false;
+
+  bvt lst;
+
   formula << "(";
   forall_transitionLists(iter, last_node->_tlist){
     forall_transitions(titer, (*iter)->_tlist){
@@ -2092,7 +2095,6 @@ void poEncoding:: init()
 	  slv.l_set_to(X_f, true);
 	}
 	if( envA->isRecvType()){//(envA->isSendType() || envA->isRecvType()){
-	  bvt lst;
 	  forall_matchSet(mit, matchSet){
 	    CB Mf = (**mit).front();
 	    CB Mb = (**mit).back();
@@ -2101,15 +2103,6 @@ void poEncoding:: init()
 	 
 	      lst.push_back(X_m);
 	    }
-	  }
-	  if(!lst.empty()){
-	    formula << "(";
-	    for(bvt::iterator bit = lst.begin(); 
-		bit != lst.end(); bit++){
-	      formula << getLitName((*bit), 0) << " | "; 
-	    }
-	    formula << ") & ";
-	    slv.l_set_to(slv.lor(lst), true);
 	  }
 	}
 	if(envA->isCollectiveType()){ 
@@ -2127,6 +2120,17 @@ void poEncoding:: init()
 	}
       }
     }
+  }
+
+  // generate formulae for S/R matches
+  if(!lst.empty()){
+	formula << "(";
+	for(bvt::iterator bit = lst.begin(); 
+		bit != lst.end(); bit++){
+	      formula << getLitName((*bit), 0) << " | "; 
+	}
+	formula << ") & ";
+	slv.l_set_to(slv.lor(lst), true);
   }
   formula << ") & " << std::endl;
 }
