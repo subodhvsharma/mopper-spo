@@ -569,7 +569,7 @@ void Scheduler::StartMC () {
     ss << _num_procs << ".trace";
     it->traceFile.open(ss.str().c_str());
     it->traceFile << "TraceLength " << it->_slist.size()-1 <<"\n";
-    it->traceFile << "Number of Transitions " << it->getTCount() <<"\n";
+    //it->traceFile << "Number of Transitions " << it->getTCount() <<"\n";
     
     std::vector<Node*>::iterator nit, nitend;
     nitend = it->_slist.end();
@@ -587,44 +587,44 @@ void Scheduler::StartMC () {
     	 Transition *t = (*nit)->GetTransition(*lit);
     	 Envelope *env = t->GetEnvelope();
 	 
-	 if(env->isSendType()){
-	   srCnt++;
-	   break;
-	 }
+	 // if(env->isSendType()){
+	 //   srCnt++;
+	 //   break;
+	 // }
 	 
-    	// it->traceFile << env->id << " " << env->index 
-    	// 	      << " " << env->func_id << " "; 
+    	it->traceFile << env->id << " " << env->index 
+    		      << " " << env->display_name << " "; 
 
-    	// if (env->isSendType())
-    	//   it->traceFile << env->dest << " ";
-    	// else if (env->isRecvType())
-    	//   it->traceFile << env->src << " ";
+    	if (env->isSendType())
+    	  it->traceFile << env->dest << " ";
+    	else if (env->isRecvType())
+    	  it->traceFile << env->src << " ";
 	
-    	// // Printing the immediate PO successors
-    	// std::vector <int>::iterator POiter;
-    	// std::vector <int>::iterator POiterend = t->get_ancestors().end();
-    	// it->traceFile << "{ ";
-    	// for (POiter = t->get_ancestors().begin(); POiter != POiterend; POiter++) {
+    	// Printing the immediate PO successors
+    	std::vector <int>::iterator POiter;
+    	std::vector <int>::iterator POiterend = t->get_ancestors().end();
+    	it->traceFile << "{ ";
+    	for (POiter = t->get_ancestors().begin(); POiter != POiterend; POiter++) {
 
-    	// it->traceFile << (*POiter) << " ";
+    	it->traceFile << (*POiter) << " ";
 
-    	// }
-    	// it->traceFile << "};";
+    	}
+    	it->traceFile << "};";
 	
       }
-      //     it->traceFile << "\n";
+      it->traceFile << "\n";
     }
-    it->traceFile <<  "No. of SR Matches " << srCnt << "\n";
-    it->traceFile << "Potential Match Set Size " << m->_MSet.size() << "\n";
-    it->traceFile << "Degree of Nondeterminism " << (m->_MSet.size()*1.0)/srCnt << "\n";
+    //it->traceFile <<  "No. of SR Matches " << srCnt << "\n";
+    //it->traceFile << "Potential Match Set Size " << m->_MSet.size() << "\n";
+    //  it->traceFile << "Degree of Nondeterminism " << (m->_MSet.size()*1.0)/srCnt << "\n";
     
     _MIterator mit, mitend;
     mitend = m->_MSet.end();
     
-    // for (mit = m->_MSet.begin(); mit != mitend; mit++){
-    //   it->traceFile << (*mit).second.front() << " "
-    // 		    << (*mit).second.back() << "\n";
-    // }
+    for (mit = m->_MSet.begin(); mit != mitend; mit++){
+      it->traceFile << (*mit).second.front() << " "
+    		    << (*mit).second.back() << "\n";
+    }
     it->traceFile.close();
     
     /* end of trace file output */

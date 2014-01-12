@@ -18,7 +18,7 @@ ifneq ($(MINISAT2),)
   MINISAT2_SRC=sat/satcheck_minisat2.cpp
   MINISAT2_INCLUDE=-I $(MINISAT2)
   MINISAT2_LIB=$(MINISAT2)/simp/SimpSolver$(OBJEXT) $(MINISAT2)/core/Solver$(OBJEXT)
-  CP_CXXFLAGS += -DHAVE_MINISAT2 -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -DDEBUG
+  CP_CXXFLAGS += -DHAVE_MINISAT2 -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -DDEBUG -DNEW_ENCODING
   override CXXFLAGS := $(filter-out -pedantic, $(CXXFLAGS))
 endif
 
@@ -68,7 +68,7 @@ endif
    LINGELING_SRC=sat/satcheck_lingeling.cpp
    LINGELING_INCLUDE=-I $(LINGELING)
    LINGELING_LIB=$(LINGELING)/liblgl$(LIBEXT)
-   CP_CXXFLAGS += -DHAVE_LINGELING
+   CP_CXXFLAGS += -DHAVE_LINGELING -DNEW_ENCODING
  endif
 
 SRC = $(LINGELING_SRC) \
@@ -80,7 +80,6 @@ SRC = $(LINGELING_SRC) \
       ../util/threeval.cpp \
       ../util/mp_arith.cpp \
       flattening/bv_utils.cpp 
-#   sat/cardinality.cpp \	
 
 
 INCLUDES= -I .. \

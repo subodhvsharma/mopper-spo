@@ -10,6 +10,7 @@ Author: Daniel Kroening, kroening@kroening.com
 
 #include "bv_utils.h"
 
+#include <iostream>
 /*******************************************************************\
 
 Function: bv_utilst::build_constant
@@ -1232,8 +1233,209 @@ literalt bv_utilst::lt_or_le(
   const bvt &bv1,
   representationt rep)
 {
+  // literalt top0=bv0[bv0.size()-1],
+  //          top1=bv1[bv1.size()-1];
+
+  // literalt carry=
+  //   carry_out(bv0, inverted(bv1), const_literal(true));
+
+  // literalt result;
+
+  // if(rep==SIGNED)
+  //   result=prop.lxor(prop.lequal(top0, top1), carry);
+  // else if(rep==UNSIGNED)
+  //   result=prop.lnot(carry);
+  // else
+  //   assert(false);
+
+  // if(or_equal)
+  //   result=prop.lor(result, equal(bv0, bv1));
+
+  // return result;"
+  assert(bv0.size() == bv1.size());
+
+  bvt clause;
   literalt top0=bv0[bv0.size()-1],
-           top1=bv1[bv1.size()-1];
+    top1=bv1[bv1.size()-1];
+  
+#ifdef NEW_ENCODING
+
+  bvt compareBelow;   // 1 if a compare is needed below this bit
+  literalt result;
+  size_t start;
+  size_t i;
+
+  compareBelow.resize(bv0.size());
+  Forall_literals(it, compareBelow) { (*it) = prop.new_variable(); }
+  result = prop.new_variable();
+
+  if (rep==SIGNED)
+    {
+      assert(bv0.size() >= 2);
+      start = compareBelow.size() - 2;
+
+      literalt firstComp=compareBelow[start];
+
+      // When comparing signs we are comparing the top bit
+#ifdef INCLUDE_REDUNDANT_CLAUSES
+      clause.resize(1);
+      clause[0] = compareBelow[start + 1];
+      prop.lcnf(clause);
+#endif    
+
+      // Four cases...
+      // + +        compare needed
+      clause.resize(3);
+      clause[0] = top0;
+      clause[1] = top1;
+      clause[2] = firstComp;
+      prop.lcnf(clause);
+
+
+      //   + -        result false and no compare needed
+      clause.resize(3);
+      clause[0] = top0;
+      clause[1] = neg(top1);
+      clause[2] = neg(result);
+      prop.lcnf(clause);
+
+#ifdef INCLUDE_REDUNDANT_CLAUSES
+      clause.resize(3);
+      clause[0] = top0;
+      clause[1] = neg(top1);
+      clause[2] = neg(firstComp);
+      prop.lcnf(clause);
+#endif
+
+
+      //   - +        result true
+      clause.resize(3);
+      clause[0] = neg(top0);
+      clause[1] = top1;
+      clause[2] = result;
+      prop.lcnf(clause);
+
+#ifdef INCLUDE_REDUNDANT_CLAUSES
+      clause.resize(3);
+      clause[0] = neg(top0);
+      clause[1] = top1;
+      clause[2] = neg(firstComp);
+      prop.lcnf(clause);
+#endif
+
+
+      //   - -        negated compare needed
+      clause.resize(3);
+      clause[0] = neg(top0);
+      clause[1] = neg(top1);
+      clause[2] = firstComp;
+      prop.lcnf(clause);
+
+    }
+  else
+    {
+      // Unsigned is much easier
+      start = compareBelow.size() - 1;
+
+      clause.resize(1);
+      clause[0] = compareBelow[start];
+      prop.lcnf(clause);
+    }
+
+  // Determine the output
+  //  \forall i .  cb[i] & -a[i] &  b[i] =>  result
+  //  \forall i .  cb[i] &  a[i] & -b[i] => -result
+  i = start;
+  do
+    {
+      clause.resize(4);
+      clause[0] = neg(compareBelow[i]);
+      clause[1] = bv0[i];
+      clause[2] = neg(bv1[i]);
+      clause[3] = result;
+      prop.lcnf(clause);
+
+      clause.resize(4);
+      clause[0] = neg(compareBelow[i]);
+      clause[1] = neg(bv0[i]);
+      clause[2] = bv1[i];
+      clause[3] = neg(result);
+      prop.lcnf(clause);
+    }
+  while (i-- != 0);
+
+
+  // Chain the comparison bit
+  //  \forall i != 0 . cb[i] &  a[i] &  b[i] => cb[i-1]
+  //  \forall i != 0 . cb[i] & -a[i] & -b[i] => cb[i-1]
+  for (i = start; i > 0; i--)
+    {
+      clause.resize(4);
+      clause[0] = neg(compareBelow[i]);
+      clause[1] = neg(bv0[i]);
+      clause[2] = neg(bv1[i]);
+      clause[3] = compareBelow[i-1];
+      prop.lcnf(clause);
+    
+      clause.resize(4);
+      clause[0] = neg(compareBelow[i]);
+      clause[1] = bv0[i];
+      clause[2] = bv1[i];
+      clause[3] = compareBelow[i-1];
+      prop.lcnf(clause);
+    }
+
+#ifdef INCLUDE_REDUNDANT_CLAUSES
+  
+  // Optional zeroing of the comparison bit when not needed
+  //  \forall i != 0 . -c[i] => -c[i-1]
+  //  \forall i != 0 .  c[i] & -a[i] &  b[i] => -c[i-1]
+  //  \forall i != 0 .  c[i] &  a[i] & -b[i] => -c[i-1]
+  for (i = start; i > 0; i--)
+    {
+      clause.resize(2);
+      clause[0] = compareBelow[i];
+      clause[1] = neg(compareBelow[i-1]);
+      prop.lcnf(clause);
+
+      clause.resize(4);
+      clause[0] = neg(compareBelow[i]);
+      clause[1] = bv0[i];
+      clause[2] = neg(bv1[i]);
+      clause[3] = neg(compareBelow[i-1]);
+      prop.lcnf(clause);
+
+      clause.resize(4);
+      clause[0] = neg(compareBelow[i]);
+      clause[1] = neg(bv0[i]);
+      clause[2] = bv1[i];
+      clause[3] = neg(compareBelow[i-1]);
+      prop.lcnf(clause);
+    }
+#endif
+
+
+  // The 'base case' of the induction is the case when they are equal
+  clause.resize(4);
+  clause[0] = neg(compareBelow[0]);
+  clause[1] = neg(bv0[0]);
+  clause[2] = neg(bv1[0]);
+  clause[3] = (or_equal) ? result : neg(result);
+  prop.lcnf(clause);
+
+  clause.resize(4);
+  clause[0] = neg(compareBelow[0]);
+  clause[1] = bv0[0];
+  clause[2] = bv1[0];
+  clause[3] = (or_equal) ? result : neg(result);
+  prop.lcnf(clause);
+
+
+  return result;
+
+
+#else
+
 
   literalt carry=
     carry_out(bv0, inverted(bv1), const_literal(true));
@@ -1251,6 +1453,10 @@ literalt bv_utilst::lt_or_le(
     result=prop.lor(result, equal(bv0, bv1));
 
   return result;
+
+#endif
+
+
 }
 
 /*******************************************************************\
@@ -1269,10 +1475,16 @@ literalt bv_utilst::unsigned_less_than(
   const bvt &op0,
   const bvt &op1)
 {
+#ifdef NEW_ENCODING
+  //  constraintStream << "NE defined" << std::endl;
+  return lt_or_le(false,op0,op1,UNSIGNED);
+#else
   // A <= B  iff  there is an overflow on A-B
-
+  //  std::constraintStream << "NE not defined" << std::endl;
   return prop.lnot(
-    carry_out(op0, inverted(op1), const_literal(true)));
+		   carry_out(op0, inverted(op1), const_literal(true)));
+#endif
+
 }
 
 /*******************************************************************\
