@@ -19,5 +19,5 @@
  * Date:    January 9th 2009
  */
 
-#include "/usr/include/openmpi-x86_64//mpi.h"
-#include "/home/scratch/dlock/fm14/mopper-spo/install/include/isp/isp.h"
+#include "/usr/include/mpich2/mpi.h"
+#include "/home/ssharma/svs-research/isp-versions/isp-predictive-binary/include/isp/isp.h"

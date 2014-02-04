@@ -118,7 +118,7 @@ propt::resultt satcheck_lingelingt::prop_solve()
     std::string msg=
       i2string(_no_variables)+" variables, "+
       i2string(clause_counter)+" clauses";
-    //messaget::status(msg);
+    //    messaget::status(msg);
   }
   
   std::string msg;

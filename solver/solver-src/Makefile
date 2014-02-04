@@ -18,7 +18,7 @@ ifneq ($(MINISAT2),)
   MINISAT2_SRC=sat/satcheck_minisat2.cpp
   MINISAT2_INCLUDE=-I $(MINISAT2)
   MINISAT2_LIB=$(MINISAT2)/simp/SimpSolver$(OBJEXT) $(MINISAT2)/core/Solver$(OBJEXT)
-  CP_CXXFLAGS += -DHAVE_MINISAT2 -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -DDEBUG -DNEW_ENCODING
+  CP_CXXFLAGS += -DHAVE_MINISAT2 -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -DDEBUG
   override CXXFLAGS := $(filter-out -pedantic, $(CXXFLAGS))
 endif
 
@@ -64,27 +64,28 @@ endif
 #   CP_CXXFLAGS += -DHAVE_PICOSAT
 # endif
 
- ifneq ($(LINGELING),)
-   LINGELING_SRC=sat/satcheck_lingeling.cpp
-   LINGELING_INCLUDE=-I $(LINGELING)
-   LINGELING_LIB=$(LINGELING)/liblgl$(LIBEXT)
-   CP_CXXFLAGS += -DHAVE_LINGELING -DNEW_ENCODING
- endif
+ifneq ($(LINGELING),)
+  LINGELING_SRC=sat/satcheck_lingeling.cpp
+  LINGELING_INCLUDE=-I $(LINGELING)
+  LINGELING_LIB=$(LINGELING)/liblgl$(LIBEXT)
+  CP_CXXFLAGS += -DHAVE_LINGELING
+endif
 
-SRC = $(LINGELING_SRC) \
-	  $(MINISAT2_SRC) \
-      sat/cnf.cpp \
+SRC =  $(MINISAT2_SRC)  \
+      $(LINGELING_SRC) \
+      sat/cnf.cpp sat/dimacs_cnf.cpp sat/cnf_clause_list.cpp \
       prop/prop.cpp \
       prop/prop_assignment.cpp \
       ../util/i2string.cpp \
       ../util/threeval.cpp \
       ../util/mp_arith.cpp \
       flattening/bv_utils.cpp 
+#   sat/cardinality.cpp \
 
 
 INCLUDES= -I .. \
-	$(LINGELING_INCLUDE) \
-	$(MINISAT2_INCLUDE) 
+	 $(MINISAT2_INCLUDE) \
+	 $(LINGELING_INCLUDE)
 
 CLEANFILES = solvers$(LIBEXT)
 
@@ -105,7 +106,7 @@ all: solvers$(LIBEXT)
 ###############################################################################
 
 solvers$(LIBEXT): $(OBJ) \
-        $(LINGELING_LIB) \
-        $(MINISAT2_LIB) 
+        $(MINISAT2_LIB) \
+	$(LINGELING_LIB)
 	$(LINKLIB)
 

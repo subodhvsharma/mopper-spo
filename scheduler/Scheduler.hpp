@@ -40,11 +40,9 @@ class Node;
 class ITree;
 class M;
 class W;
-class Encoding0;
-class Encoding1; 
-class Encoding2;
-class Encoding3;
-class poEncoding;
+class FMEncoding;
+class SPOEncoding;
+class propt;
 
 #include <list>
 #include "ServerSocket.hpp"
@@ -109,7 +107,7 @@ public:
                          te_Exp_Mode explore_mode, int explore_some, 
                          std::vector<int>* explore_all,
                          std::vector<int>* explore_random, std::vector<int>* explore_left_most,
-                         bool debug, bool no_ample_set_fix, unsigned bound, bool limit_output, bool fprs, int encoding);
+                         bool debug, bool no_ample_set_fix, unsigned bound, bool limit_output, bool fprs, int encoding, bool dimacs, bool show_formula, std::string solver);
 /* == fprs end == */
   /*
    * Processes that can run are here.
@@ -117,14 +115,16 @@ public:
   static std::vector <MpiProc *> _runQ;
 
   /*begin boolean formula file modification --[svs] */
-  Encoding0 *e0;  
-  Encoding1 *e1;
-  Encoding2 *e2;
-  Encoding3 *e3;
-  poEncoding *spo;
+  // Encoding0 *e0;  
+  // Encoding1 *e1;
+  // Encoding2 *e2;
+  propt *slv;
+  FMEncoding *fm;
+  SPOEncoding *spo;
   /*end of modification --[svs] */
   
-  
+  std::string getProgName(){ return this->ProgName();}
+  std::string getNumProcs() {return this->_num_procs;}
 private:
   /*
    * Constructor: The constructor requires the port number it
@@ -208,7 +208,7 @@ public:
   static bool											_limit_output;//CGD
   
   //  static int  traceLength;
-  int                             order_id;
+  int                                    order_id;
   static std::vector<int>                *_explore_all;
   static std::vector<int>                *_explore_random;
   static std::vector<int>                *_explore_left_most;
@@ -219,6 +219,9 @@ public:
 /* svs == SAT encoding */
   static int _encoding;
   static bool _errorTrace;
+  static bool _dimacs;
+  static bool _formula;
+  static std::string _solver;
   /* svs -- end SAT encoding */
 };
 #endif

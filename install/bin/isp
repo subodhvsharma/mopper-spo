@@ -15,4 +15,4 @@ export PATH="/bin":$PATH
 if [ ! -x "/bin/mpiexec" ]; then
     export USE_MPIRUN="true"
 fi
-exec "/home/scratch/dlock/fm14/mopper-spo/install/bin/isp.exe" $*
+exec "/uusoc/res/uv/svs/isp-predictive/install/bin/isp.exe" $*

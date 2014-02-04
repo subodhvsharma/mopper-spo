@@ -11,4 +11,4 @@
 # See LICENSE for licensing information
 #
 
-/usr/local/bin/java -jar "/home/scratch/dlock/fm14/mopper-spo/install/bin/ispui.jar" $* 
+/usr/lib/jvm/java-1.6.0-openjdk-amd64/jre/bin/java -jar "/home/ssharma/svs-research/isp-versions/isp-predictive-binary/bin/ispui.jar" $* 

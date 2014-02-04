@@ -50,7 +50,9 @@
 #include <cstdlib>
 
 /* svs -- SAT solving begin */
-#include "Encoding.hpp"
+//#include "Encoding.hpp"
+#include "FMEncoding.hpp"
+#include "SPOEncoding.hpp"
 #include "utility.hpp"
 #include "stdlib.h"
 /* svs -- SAT solving end */
@@ -99,6 +101,9 @@ bool Scheduler::_fprs;
 /* svs -- SAT solving begin */
 int Scheduler::_encoding = 0;
 bool Scheduler::_errorTrace = false;
+bool Scheduler::_dimacs = false;
+bool Scheduler::_formula = false;
+std::string Scheduler::_solver = "";
 /* svs -- SAT solving end */
 
 fd_set Scheduler::_fds;
@@ -112,8 +117,8 @@ std::map <SOCKET, int> Scheduler::_fd_id_map;
 std::vector <MpiProc *> Scheduler::_runQ;
 Node *Scheduler::root = NULL;
 
-//static int redrule1cnt = 0 ;
-//static int redrule2cnt = 0 ;
+static int redrule1cnt = 0 ;
+static int redrule2cnt = 0 ;
 
 //int Scheduler::traceLength = 0;
 
@@ -153,7 +158,8 @@ void Scheduler::SetParams (std::string port, std::string num_clients,
 			   , bool fprs,
 			   /* == fprs end == */
 			   /* svs -- SAT solving begin */
-			   int encoding
+			   int encoding, bool dimacs, bool show_formula, 
+			   std::string solver
 			   /* svs -- SAT solving end */
 			   ) {//CGD
 
@@ -189,6 +195,9 @@ void Scheduler::SetParams (std::string port, std::string num_clients,
 
 /* svs -- SAT solving begin */
   _encoding = encoding;
+  _dimacs = dimacs;
+  _formula = show_formula;
+  _solver = solver;
 /* svs -- SAT solving end */
 
   /* open the logfile for writing */    
@@ -499,13 +508,17 @@ void Scheduler::StartMC () {
 
     generateFirstInterleaving ();
     
+    if(Scheduler::_just_dead_lock)
+      exit(1);
+    
     //    std::cout << "Second last node's match set: " <<
     //      it->_slist[it->_slist.size()-2]->curr_match_set.back() << std::endl;
 
     // modification for CoE -- svs, sriram 
     m->_MConstruct(it);
-    
-    //    std::cout << "Match relation:" << *m << std::endl;
+
+    //#ifdef WFREFINE    
+    //std::cout << "Match relation:" << *m << std::endl;
     // std::cout << "Match relation size:" << m->_MSet.size() << std::endl;
    
     // w->MPtr = m;
@@ -513,18 +526,20 @@ void Scheduler::StartMC () {
     // bool reflag1 = false, reflag2 =false;
     // int cnt1 =0, cnt2 =0;
     // do{
+    //   reflag1 = false;
+    //   reflag2= false;
+      
+    //   std::cout << "******" << std::endl;
+     
     //   w->_WConstruct(it);
     //   //std::cout << "Wait relation:" << *w << std::endl;
-      
-    //   // waitfor_relation.coenabledPtr = &coenabled_relation;
-    //   // waitfor_relation.WfRConstruct(it);
-    //   //  std::cout << "Wait-for relation:" << waitfor_relation << std::endl;
-      
+    //   std::cout << "Wait relation size:" << w->_WSet.size() << std::endl; 
     //   w->TransitiveClosure(it->_slist[it->_slist.size()-1]);
     //   // std::cout << "Wait relation after transitive closure:" << *w << std::endl;
       
     //   w->RefineW();
     //   // std::cout << "Wait relation after refinement:" << *w << std::endl;
+    //   std::cout << "Wait relation size after refinement:" << w->_WSet.size() << std::endl; 
     //   // std::cout.flush();
       
     //   reflag1 = w->ApplyRefineRuleOne(it->_slist[it->_slist.size()-1], redrule1cnt);
@@ -544,6 +559,7 @@ void Scheduler::StartMC () {
     // }while(reflag1 || reflag2);
 
     // // std::cout << "Match relation after Fixpoint:" << *m << std::endl;
+    // std::cout << "Match relation size after Fixpoint:" << m->_MSet.size() << std::endl;
     // // std::cout << "Wait relation after Fixpoint:" << *w << std::endl;
     // // std::cout << "Reduction Rule 1 fired: " << redrule1cnt << std::endl;
     // // std::cout << "Reduction Rule 2 fired: " << redrule2cnt << std::endl;
@@ -551,16 +567,17 @@ void Scheduler::StartMC () {
     // // std::cout << "Rule 2 called: " << cnt2 << std::endl;
     // // std::cout.flush();
     
-    // int spid = -1; // pid of the sender process involved in a deadlock
+    // // int spid = -1; // pid of the sender process involved in a deadlock
   
-    // bool deadlock = w->DeadlockDetection(it->al_curr, it->_slist[it->_slist.size()-1], spid);
+    // // bool deadlock = w->DeadlockDetection(it->al_curr, it->_slist[it->_slist.size()-1], spid);
+    // //#endif
     
+    // gettimeofday (&second, NULL);
+    // total_time += getTimeElapsed (first, second);
     
-    gettimeofday (&second, NULL);
-    total_time += getTimeElapsed (first, second);
+    // //PrintStats(total_time);
 
-    //PrintStats(total_time);
-    
+    //#ifdef TRACEGEN    
     /* svs -- Print out the trace file  */
     std::stringstream ss;
     ss << ProgName() << "."; 
@@ -569,7 +586,7 @@ void Scheduler::StartMC () {
     ss << _num_procs << ".trace";
     it->traceFile.open(ss.str().c_str());
     it->traceFile << "TraceLength " << it->_slist.size()-1 <<"\n";
-    //it->traceFile << "Number of Transitions " << it->getTCount() <<"\n";
+    it->traceFile << "Number of Transitions " << it->getTCount() <<"\n";
     
     std::vector<Node*>::iterator nit, nitend;
     nitend = it->_slist.end();
@@ -587,10 +604,10 @@ void Scheduler::StartMC () {
     	 Transition *t = (*nit)->GetTransition(*lit);
     	 Envelope *env = t->GetEnvelope();
 	 
-	 // if(env->isSendType()){
-	 //   srCnt++;
-	 //   break;
-	 // }
+    	 // if(env->isSendType()){
+    	 //   srCnt++;
+    	 //   break;
+    	 // }
 	 
     	it->traceFile << env->id << " " << env->index 
     		      << " " << env->display_name << " "; 
@@ -605,18 +622,18 @@ void Scheduler::StartMC () {
     	std::vector <int>::iterator POiterend = t->get_ancestors().end();
     	it->traceFile << "{ ";
     	for (POiter = t->get_ancestors().begin(); POiter != POiterend; POiter++) {
-
+	  
     	it->traceFile << (*POiter) << " ";
-
+	
     	}
     	it->traceFile << "};";
 	
       }
       it->traceFile << "\n";
     }
-    //it->traceFile <<  "No. of SR Matches " << srCnt << "\n";
-    //it->traceFile << "Potential Match Set Size " << m->_MSet.size() << "\n";
-    //  it->traceFile << "Degree of Nondeterminism " << (m->_MSet.size()*1.0)/srCnt << "\n";
+    // it->traceFile <<  "No. of SR Matches " << srCnt << "\n";
+    // it->traceFile << "Potential Match Set Size " << m->_MSet.size() << "\n";
+    // it->traceFile << "Degree of Nondeterminism " << (m->_MSet.size()*1.0)/srCnt << "\n";
     
     _MIterator mit, mitend;
     mitend = m->_MSet.end();
@@ -629,6 +646,7 @@ void Scheduler::StartMC () {
     
     /* end of trace file output */
     
+    //#endif
     /* 
        Generate the sat formula for the trace and associated interleavings
     */ 
@@ -653,30 +671,85 @@ void Scheduler::StartMC () {
     // two values: 
     // 1) for FM encoding ENCODINGTYPE=fmEnc
     // 2) for PLDI encodin ENCODINGTYPE=pldiEnc
+   
+    //    ----
+    // char const * encType = getenv("ENCODINGTYPE");
+    // if (encType ==NULL){
+    //   std::cout << "Environment variable ENCODINGTYPE is not set .. exiting" <<std::endl;
+    //   exit(0);
+    // }
+    // else{
+    //   std::string eType(encType);
+    //   if (eType.compare("fmEnc") == 0){
+    // 	std::cout << "Executing the FM encoding" <<std::endl;
+    // 	e3 = new FMEncoding(it, m); 
+    // 	e3->encodingPartialOrders();
+    //   }
+    //   else if (eType.compare("pldiEnc") == 0){
+    // 	std::cout << "Executing the SPO encoding" <<std::endl;
+    // 	spo = new SPOEncoding(it, m);
+    // 	spo->poEnc();
+    //   }
+    //   else {
+    // 	std::cout << "ENCODINGTYPE is not set to either fmEnc or pldiEnc"
+    // 		  <<std::endl;
+    // 	exit(0);
+    //   }
+    // }
     
-    char const * encType = getenv("ENCODINGTYPE");
-    if (encType ==NULL){
-      std::cout << "Environment variable ENCODINGTYPE is not set .. exiting" <<std::endl;
+    if(Scheduler::_solver.compare("minisat") == 0)
+      slv = static_cast<propt*> (new satcheck_simplifiert);
+    else if (Scheduler::_solver.compare("lingeling") == 0)
+      slv = static_cast<propt*> (new satcheck_lingelingt);
+    else {
+      std::cout << "Only minisat and lingeling supported. QUITING!" << std::endl;
+      ExitMpiProcessAndWait (true);
       exit(0);
     }
-    else{
-      std::string eType(encType);
-      if (eType.compare("fmEnc") == 0){
-	std::cout << "Executing the FM encoding" <<std::endl;
-	e3 = new Encoding3(it, m); 
-	e3->encodingPartialOrders();
-      }
-      else if (eType.compare("pldiEnc") == 0){
-	std::cout << "Executing the SPO encoding" <<std::endl;
-	spo = new poEncoding(it, m);
-	spo->poEnc();
-      }
-      else {
-	std::cout << "ENCODINGTYPE is not set to either fmEnc or pldiEnc"
-		  <<std::endl;
-	exit(0);
-      }
+
+    if(Scheduler::_encoding == 0){
+ 	std::cout << "Executing the FM encoding" <<std::endl;
+    	fm = new FMEncoding(it, m, slv); 
+    	fm->encodingPartialOrders();
     }
+    else if (Scheduler::_encoding == 1){
+      std::cout << "Executing the SPO encoding" <<std::endl;
+      spo = new SPOEncoding(it, m, slv);
+      spo->poEnc();
+    }
+    else {
+      std::cout << "ENCODINGTYPE is not set to either fmEnc or pldiEnc"
+		<<std::endl;
+      ExitMpiProcessAndWait (true);
+      
+      exit(0);
+    }
+    
+    if(Scheduler::_dimacs) {
+      dimacs_cnft *dumper = new dimacs_cnft;
+      //static_typecast<propt *>(dumper)
+      if(Scheduler::_encoding == 0){
+	FMEncoding *fme = new FMEncoding(it, m,
+					 static_cast<propt *>(dumper));
+	fme->generateConstraints();
+      }
+      if(Scheduler::_encoding == 1){
+	SPOEncoding *fme = new SPOEncoding(it, m,
+					 static_cast<propt *>(dumper));
+	fme->generateConstraints();
+      }
+      
+      std::ofstream dumpFile;
+      std::stringstream df;
+      df << ProgName() << "."; 
+      if(Scheduler::_send_block)
+	df << "b.";
+      df << _num_procs << ".dimacs";
+      dumpFile.open(df.str().c_str());
+      dumper->write_dimacs_cnf(dumpFile);
+      dumpFile.close();
+    }
+
 
     ExitMpiProcessAndWait (true);
     

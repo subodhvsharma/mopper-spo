@@ -11,8 +11,8 @@
 # See LICENSE for licensing information
 #
 
-export PATH="/bin":$PATH
-if [ ! -x "/bin/mpiexec" ]; then
+export PATH="/usr/bin":$PATH
+if [ ! -x "/usr/bin/mpiexec" ]; then
     export USE_MPIRUN="true"
 fi
-exec "/home/scratch/dlock/fm14/mopper-spo/install/bin/isp.exe" $*
+exec "/home/ssharma/svs-research/isp-versions/isp-predictive-binary/bin/isp.exe" $*

@@ -1,9 +1,3 @@
-In order to run MOPPER with SPO or FM encoding, set up an environment variable ENCODINGTYPE in your
-.bashrc file. Choose an encoding and assigning the following values to the env. variable 
-
-a) for FM encoding: ENCODINGTYPE=fmEnc
-b) for PLDI/SPO encoding: ENCODINGTYPE=pldiEnc
-
 =======
 
 1) MPICC should be installed on the system. An easy way to install MPICC is by installing
@@ -11,14 +5,12 @@ MPICH2.
 
 2) Install the solver
    a) Go to the solver directory
-   b) Choose the solver in config.inc
    b) make
 
 3) Install ISP+MOPPER 
-  a) ./configure --prefix="Some Directory" --disable-gui --enable-optional-ample-set-fix --with-mpi-inc-dir=<path to mpi.h file>
-  b) make
-  c) edit scheduler/Encoding.hpp to fix the solver
-  d) make install
+./configure --prefix="Some Directory" --disable-gui --enable-optional-ample-set-fix --with-mpi-inc-dir=<path to mpi.h file>
+make
+make install
 
 NOTE: The implementation is tested on Linux 2.6.32-51 and  3.2.0-51 (Ubuntu 12.04) with GCC version 4.4.3 and 4.6.3.
 

@@ -57,7 +57,8 @@ am_isp_exe_OBJECTS = Socket.$(OBJEXT) ServerSocket.$(OBJEXT) \
 	Scheduler.$(OBJEXT) Counter.$(OBJEXT) Transition.$(OBJEXT) \
 	TransitionList.$(OBJEXT) InterleavingTree.$(OBJEXT) \
 	utility.$(OBJEXT) Mo.$(OBJEXT) Wu.$(OBJEXT) Encoding.$(OBJEXT) \
-	sched-opt.$(OBJEXT) main.$(OBJEXT)
+	FMEncoding.$(OBJEXT) SPOEncoding.$(OBJEXT) sched-opt.$(OBJEXT) \
+	main.$(OBJEXT)
 isp_exe_OBJECTS = $(am_isp_exe_OBJECTS)
 isp_exe_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/libopts
@@ -236,7 +237,8 @@ AM_CFLAGS = -DHAVE_STDINT_H -Wall $(LIBOPTS_CFLAGS) -O2
 INCLUDES = -I ../solver
 isp_exe_SOURCES = Socket.cpp ServerSocket.cpp MpiProc.cpp Envelope.cpp \
                   name2id.cpp  Scheduler.cpp  Counter.cpp Transition.cpp TransitionList.cpp \
-                  InterleavingTree.cpp utility.cpp Mo.cpp Wu.cpp Encoding.cpp sched-opt.c main.cpp
+                  InterleavingTree.cpp utility.cpp Mo.cpp Wu.cpp Encoding.cpp FMEncoding.cpp \
+	          SPOEncoding.cpp sched-opt.c main.cpp
 
 all: config.hpp
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -344,9 +346,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Counter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Encoding.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Envelope.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FMEncoding.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/InterleavingTree.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Mo.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MpiProc.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SPOEncoding.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Scheduler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ServerSocket.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Socket.Po@am__quote@

@@ -5,18 +5,12 @@
 #include "InterleavingTree.hpp"
 #include <map>
 #include "utility.hpp"
+#include "util/threeval.h"
 #include "solver-src/flattening/bv_utils.h"
-
-#define LINGELING
-//#define MINISAT2
-
-#ifdef LINGELING
-#include <solver-src/sat/satcheck_lingeling.h>
-#endif
-
-#ifdef MINISAT2
 #include <solver-src/sat/satcheck_minisat2.h>
-#endif
+#include <solver-src/sat/satcheck_lingeling.h>
+#include <solver-src/sat/dimacs_cnf.h>
+#include <memory>
 
 typedef std::list<CB> * MatchPtr; 
 typedef std::list<CB>  Match; 
@@ -29,15 +23,8 @@ typedef Match::iterator LIter;
 typedef std::vector<TransitionList *>::iterator TLIter;
 typedef std::vector<Transition>::iterator TIter;
 
-#ifdef LINGELING
-typedef  satcheck_lingelingt satcheckt;
-typedef  satcheck_lingelingt satcheck_simplifiert;
-#endif
-
-#ifdef MINISAT2
 typedef satcheck_minisat_no_simplifiert satcheckt;
 typedef satcheck_minisat_simplifiert satcheck_simplifiert;
-#endif
 
 #define forall_matchSet(it, MT) \
   for (MIter it = MT.begin(), it_end = MT.end(); \
@@ -59,7 +46,7 @@ typedef satcheck_minisat_simplifiert satcheck_simplifiert;
 class Encoding{
 public:
   //  Encoding();
-  Encoding(ITree *it, M *m); 
+  Encoding(ITree *it, M *m, propt *); 
   ~Encoding(){}
 
   virtual std::string getLitName(literalt a);
@@ -72,8 +59,10 @@ public:
   ITree *_it; 
   literalt one, zero;  
   //satcheckt slv;
-  satcheck_simplifiert  slv;
-  bv_utilst bvUtils;  
+  propt * slv;
+  //satcheck_simplifiert  slv;
+  bv_utilst * bvUtils;  
+
   std::vector<MatchPtr> matchSet;
   std::map<StrIntPair, literalt> sym2lit; 
   std::map<literalt, StrIntPair > lit2sym; 
@@ -81,233 +70,92 @@ public:
   struct timeval constGenStart, constGenEnd, solverStart, solverEnd;
 };
 
-class Encoding0 : public Encoding{
-public: 
-  Encoding0(ITree *it, M *m): Encoding(it, m) {} 
+// class Encoding0 : public Encoding{
+// public: 
+//   Encoding0(ITree *it, M *m): Encoding(it, m) {} 
   
-  //main encoding function
-  void Encoding_Matches();
+//   //main encoding function
+//   void Encoding_Matches();
   
-  // helper functions for Encoding_Matches
-  literalt uniqueAtPosition();
-  literalt noRepetition ();
-  literalt partialOrder();
-  literalt extensionNextPos();
-  literalt noMatchAtNextPos();
-  
-
-  literalt uniqueEvents();
-  literalt noRepetitionEvents();
-  literalt partialOrderEvents();
-  literalt extentionEvents();
-  literalt noMatchEvents();
-  
-  //helper functions
-  void createMatchLiterals(); 
-  literalt getLiteralFromMatches(MatchPtr, int);
-
-  //  IntPair getMatchNumeralPositionFromMatches(MatchPtr, int);
-
-  void publish();
-
-protected: 
-  std::multimap<MatchPtr, StrIntPair > match2sym; // symbol:= (match, pos)
-};
-
-class Encoding1 : public Encoding{
-
-public:
-  Encoding1(ITree *it, M *m): Encoding(it, m) {} 
-
-  
-  //main encoding function
-  void Encoding_Events();
-  
-  // helper functions for Encoding_Matches
-  void stutteringAtPosition();
-  void uniqueAtPosition();
-  void noRepetition ();
-  void partialOrder();
-  void extensionNextPos();
-  void noMatchAtNextPos();
-
-  // general helper functions
-  void createEventLiterals();
-  literalt getLiteralFromEvents(TIter, int);
-  literalt getLiteralFromCB(CB, int);
-  void publish();
-};
-
-class Encoding2 : public Encoding {
-public:
-  Encoding2(ITree *it, M *m): Encoding(it, m) {} 
-
-  
-  //main encoding function
-  void Encoding_Mixed();
-  
-  // helper functions for Encoding_Matches
-  void stutteringAtPosition();
-  void uniqueAtPosition();
-  void noRepetition ();
-  void partialOrder();
-  void extensionNextPos();
-  void noMatchAtNextPos();
-
-  void createMatchLiterals(); 
-  void createEventLiterals();
-  void createBVEventLiterals();
-
-  literalt getLiteralFromEvents(TIter, int);
-  literalt getLiteralFromMatches(MatchPtr, int);
-  literalt getLiteralFromCB(CB, int);
-  MatchPtr getMatchPtrFromEvent(CB a);
-  void publish();
-protected: 
-  std::multimap<MatchPtr, StrIntPair > match2sym; // symbol:= (match, pos)
-  };
-
-class poEncoding: public Encoding {
-public:
-  poEncoding(ITree *it, M *m): Encoding(it, m), width(0), eventSize(0) {} 
-
-  // bitvector related functions
-  void set_width();
-  unsigned get_width();
-  unsigned address_bits();
-
-  void createPossibleMatches();
-  void createMatchLiterals();
-  literalt getMatchLiteral(MatchPtr mptr);
-  void createFinalizeWaitLiterals();
-  literalt getFinalizeWaitLiterals(CB f);
-  void createBVLiterals();
-  bvt getBVLiterals(CB A); 
-  MatchPtr getMPtr(CB a);
-    
-  // helper functions for Encoding_Matches
-  void init();
-  void ext();
-  void dlock();
-  void m2Clk();
-  void processPO();
-  literalt predsMatched(CB q);
-  literalt exclusive(CB q, MatchPtr m);
-
-  std::string getLitName(literalt lt, int type);
-  void publish();
-  //main encoding function
-  void poEnc();
+//   // helper functions for Encoding_Matches
+//   literalt uniqueAtPosition();
+//   literalt noRepetition ();
+//   literalt partialOrder();
+//   literalt extensionNextPos();
+//   literalt noMatchAtNextPos();
   
 
-protected: 
-  unsigned width; 
-  unsigned eventSize; 
-  std::map<std::string, literalt> matchMap;
-  std::map<literalt, std::string> revMatchMap;
-  std::map<MatchPtr, std::string> match2symMap;
-
-  std::map<literalt, CB> revEventMap;
-  std::map<CB, literalt> eventMap;
-
-  std::map<CB, bvt> bvEventMap;
-  std::map<bvt, CB> revBVEventMap;
-  std::map<MatchPtr, bvt> collBVMap;
-  std::map<bvt, MatchPtr> revCollBVMap;
+//   literalt uniqueEvents();
+//   literalt noRepetitionEvents();
+//   literalt partialOrderEvents();
+//   literalt extentionEvents();
+//   literalt noMatchEvents();
   
-};
+//   //helper functions
+//   void createMatchLiterals(); 
+//   literalt getLiteralFromMatches(MatchPtr, int);
 
+//   //  IntPair getMatchNumeralPositionFromMatches(MatchPtr, int);
 
-class Encoding3 : public Encoding {
+//   void publish();
+
+// protected: 
+//   std::multimap<MatchPtr, StrIntPair > match2sym; // symbol:= (match, pos)
+// };
+
+// class Encoding1 : public Encoding{
+
+// public:
+//   Encoding1(ITree *it, M *m): Encoding(it, m) {} 
+
   
-public:
-  Encoding3(ITree *it, M *m): Encoding(it, m), width(0), eventSize(0) {} 
+//   //main encoding function
+//   void Encoding_Events();
   
-  //creation of literals m_a, i_a,
-  // and bitvectors for maintaining clocks
-  void createEventLiterals();
-  void createMatchLiterals();
-  void createBVEventLiterals();
+//   // helper functions for Encoding_Matches
+//   void stutteringAtPosition();
+//   void uniqueAtPosition();
+//   void noRepetition ();
+//   void partialOrder();
+//   void extensionNextPos();
+//   void noMatchAtNextPos();
 
-  literalt getClkLiteral(CB, CB);
-  std::pair<literalt, literalt> getMILiteral(CB);
-  literalt getMatchLiteral(MatchPtr);
-  std::string getLitName(literalt, int);
-  std::string getClkLitName(literalt, CB, CB);
-  bvt getEventBV(CB);
-  MatchPtr getMPtr(CB);
+//   // general helper functions
+//   void createEventLiterals();
+//   literalt getLiteralFromEvents(TIter, int);
+//   literalt getLiteralFromCB(CB, int);
+//   void publish();
+// };
+
+// class Encoding2 : public Encoding {
+// public:
+//   Encoding2(ITree *it, M *m): Encoding(it, m) {} 
+
   
-  void insertClockEntriesInMap(CB, CB, literalt);
-
-  //constraint generation functions
-  void createClkLiterals();
-  void createRFConstraint();
-  void createSerializationConstraint();
-  void createRFSomeConstraint();
-  void createMatchConstraint();
-  void createFrConstraint();
-  void createUniqueMatchConstraint();
-  void alternativeUniqueMatchConstraint();
-  void uniqueMatchSend();
-  void uniqueMatchRecv();
-  void allFstIssued();
-  void noMoreMatchesPossible();
-  void transitiveConstraint();
-  void allAncestorsMatched();
-  void alternateAllAncestorsMatched();
-  void totalOrderOnSends();
-  void totalOrderOnRacingSends();
-  void matchImpliesIssued();
-  void waitMatch();
-  void nonOverTakingMatch();
-  void notAllMatched();
-  void encodingPartialOrders();
-  void makingMatchesHappenSooner();
-  //printing
-  void printEventMap();
-  void publish();
+//   //main encoding function
+//   void Encoding_Mixed();
   
+//   // helper functions for Encoding_Matches
+//   void stutteringAtPosition();
+//   void uniqueAtPosition();
+//   void noRepetition ();
+//   void partialOrder();
+//   void extensionNextPos();
+//   void noMatchAtNextPos();
 
-  // bitvector related functions
-  void set_width();
-  unsigned get_width();
-  void create_bv(bvt &);
-  unsigned address_bits();
-  
-public:
+//   void createMatchLiterals(); 
+//   void createEventLiterals();
+//   void createBVEventLiterals();
 
+//   literalt getLiteralFromEvents(TIter, int);
+//   literalt getLiteralFromMatches(MatchPtr, int);
+//   literalt getLiteralFromCB(CB, int);
+//   MatchPtr getMatchPtrFromEvent(CB a);
+//   void publish();
+// protected: 
+//   std::multimap<MatchPtr, StrIntPair > match2sym; // symbol:= (match, pos)
+//   };
 
-  std::map<literalt, CB> revEventMap;
-  std::map<CB, std::pair<literalt, literalt> > eventMap;
-
-  std::map<literalt, MatchPtr> revCollMap;
-  std::map<MatchPtr,std::pair<literalt, literalt> > collEventMap;
-
-  std::map<std::string, literalt> matchMap;
-  std::map<literalt, std::string> revMatchMap;
-  std::map<MatchPtr, std::string> match2symMap;
-
-  std::map<literalt, std::pair<CB, CB> > revClkMap;
-  std::map<std::pair<CB, CB>, literalt > clkMap; 
-
-  std::map<literalt, std::pair<MatchPtr, CB> > revClkMapCollEvent;
-  std::map<std::pair<MatchPtr, CB>, literalt > clkMapCollEvent; 
-  
-  std::map<literalt, std::pair<CB, MatchPtr> > revClkMapEventColl;
-  std::map<std::pair<CB, MatchPtr>, literalt > clkMapEventColl; 
-  
-  std::map<literalt, std::pair<MatchPtr, MatchPtr> > revClkMapCollColl;
-  std::map<std::pair<MatchPtr, MatchPtr>, literalt > clkMapCollColl; 
-
-  std::map<CB, bvt> bvEventMap;
-  std::map<bvt, CB> revBVEventMap;
-  
-  std::map<MatchPtr, bvt> collBVMap;
-  std::map<bvt, MatchPtr> revCollBVMap;
-  
-  unsigned width; 
-  unsigned eventSize; 
- };
-
+extern std::stringstream formula;
 
 #endif

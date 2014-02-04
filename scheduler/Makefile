@@ -57,7 +57,8 @@ am_isp_exe_OBJECTS = Socket.$(OBJEXT) ServerSocket.$(OBJEXT) \
 	Scheduler.$(OBJEXT) Counter.$(OBJEXT) Transition.$(OBJEXT) \
 	TransitionList.$(OBJEXT) InterleavingTree.$(OBJEXT) \
 	utility.$(OBJEXT) Mo.$(OBJEXT) Wu.$(OBJEXT) Encoding.$(OBJEXT) \
-	sched-opt.$(OBJEXT) main.$(OBJEXT)
+	FMEncoding.$(OBJEXT) SPOEncoding.$(OBJEXT) sched-opt.$(OBJEXT) \
+	main.$(OBJEXT)
 isp_exe_OBJECTS = $(am_isp_exe_OBJECTS)
 isp_exe_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I. -I$(top_builddir)/libopts
@@ -87,23 +88,23 @@ DIST_SOURCES = $(isp_exe_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ACLOCAL = ${SHELL} /home/scratch/dlock/fm14/mopper-spo/missing --run aclocal-1.11
+ACLOCAL = ${SHELL} /home/ssharma/svs-research/isp-versions/isp-predictive-binary/missing --run aclocal-1.11
 AMTAR = $${TAR-tar}
 AR = ar
-AUTOCONF = ${SHELL} /home/scratch/dlock/fm14/mopper-spo/missing --run autoconf
-AUTOHEADER = ${SHELL} /home/scratch/dlock/fm14/mopper-spo/missing --run autoheader
-AUTOMAKE = ${SHELL} /home/scratch/dlock/fm14/mopper-spo/missing --run automake-1.11
+AUTOCONF = ${SHELL} /home/ssharma/svs-research/isp-versions/isp-predictive-binary/missing --run autoconf
+AUTOHEADER = ${SHELL} /home/ssharma/svs-research/isp-versions/isp-predictive-binary/missing --run autoheader
+AUTOMAKE = ${SHELL} /home/ssharma/svs-research/isp-versions/isp-predictive-binary/missing --run automake-1.11
 AWK = gawk
-BINDIR = /home/scratch/dlock/fm14/mopper-spo/install/bin
+BINDIR = /home/ssharma/svs-research/isp-versions/isp-predictive-binary/bin
 CC = g++
 CCDEPMODE = depmode=gcc3
-CFLAGS = -g -O2 -DFIB -DCONFIG_OPTIONAL_AMPLE_SET_FIX
+CFLAGS = -g -DFIB -DCONFIG_OPTIONAL_AMPLE_SET_FIX
 CPP = gcc -E
 CPPFLAGS = 
 CXX = g++
 CXXCPP = g++ -E
 CXXDEPMODE = depmode=gcc3
-CXXFLAGS = -g -O2 -DFIB -DCONFIG_OPTIONAL_AMPLE_SET_FIX
+CXXFLAGS = -g -DFIB -DCONFIG_OPTIONAL_AMPLE_SET_FIX
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
@@ -118,18 +119,18 @@ EXEEXT =
 FGREP = /bin/grep -F
 FUNCTION_NAME_VAR = __PRETTY_FUNCTION__
 GREP = /bin/grep
-INCDIR = /home/scratch/dlock/fm14/mopper-spo/install/include/isp
+INCDIR = /home/ssharma/svs-research/isp-versions/isp-predictive-binary/include/isp
 INSTALL = /usr/bin/install -c
 INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
-JAR = /usr/local/bin/jar
-JAVA = /usr/local/bin/java
-JAVAC = /usr/local/bin/javac
+JAR = /usr/lib/jvm/java-1.6.0-openjdk-amd64/bin/jar
+JAVA = /usr/lib/jvm/java-1.6.0-openjdk-amd64/jre/bin/java
+JAVAC = /usr/lib/jvm/java-1.6.0-openjdk-amd64/bin/javac
 LD = /usr/bin/ld -m elf_x86_64
 LDFLAGS = 
-LIBDIR = /home/scratch/dlock/fm14/mopper-spo/install/lib
+LIBDIR = /home/ssharma/svs-research/isp-versions/isp-predictive-binary/lib
 LIBOBJS = 
 LIBOPTS_CFLAGS = -I$(top_srcdir)/libopts
 LIBOPTS_DIR = libopts
@@ -141,14 +142,14 @@ LIPO =
 LN_S = ln -s
 LTLIBOBJS = 
 MAINT = #
-MAKEINFO = ${SHELL} /home/scratch/dlock/fm14/mopper-spo/missing --run makeinfo
+MAKEINFO = ${SHELL} /home/ssharma/svs-research/isp-versions/isp-predictive-binary/missing --run makeinfo
 MANIFEST_TOOL = :
 MKDIR_P = /bin/mkdir -p
-MPICC = /usr/lib64/openmpi/bin//mpicc
-MPICXX = /usr/lib64/openmpi/bin//mpicxx
-MPIDIR = 
-MPI_BINDIR = /bin
-MPI_INCDIR = /usr/include/openmpi-x86_64/
+MPICC = /usr/bin/mpicc
+MPICXX = /usr/bin/mpicxx
+MPIDIR = /usr
+MPI_BINDIR = /usr/bin
+MPI_INCDIR = /usr/include/mpich2
 NM = /usr/bin/nm -B
 NMEDIT = 
 OBJDUMP = objdump
@@ -166,13 +167,13 @@ PATH_SEPARATOR = :
 RANLIB = ranlib
 SED = /bin/sed
 SET_MAKE = 
-SHELL = /bin/sh
+SHELL = /bin/bash
 STRIP = strip
 VERSION = 0.2.0
-abs_builddir = /home/scratch/dlock/fm14/mopper-spo/scheduler
-abs_srcdir = /home/scratch/dlock/fm14/mopper-spo/scheduler
-abs_top_builddir = /home/scratch/dlock/fm14/mopper-spo
-abs_top_srcdir = /home/scratch/dlock/fm14/mopper-spo
+abs_builddir = /home/ssharma/svs-research/isp-versions/isp-predictive-binary/scheduler
+abs_srcdir = /home/ssharma/svs-research/isp-versions/isp-predictive-binary/scheduler
+abs_top_builddir = /home/ssharma/svs-research/isp-versions/isp-predictive-binary
+abs_top_srcdir = /home/ssharma/svs-research/isp-versions/isp-predictive-binary
 ac_ct_AR = ar
 ac_ct_CC = gcc
 ac_ct_CXX = g++
@@ -200,25 +201,25 @@ host_cpu = x86_64
 host_os = linux-gnu
 host_vendor = unknown
 htmldir = ${docdir}
-include_ispdir = /home/scratch/dlock/fm14/mopper-spo/install/include/isp
+include_ispdir = /home/ssharma/svs-research/isp-versions/isp-predictive-binary/include/isp
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /home/scratch/dlock/fm14/mopper-spo/install-sh
-jar = /usr/local/bin/jar
-java = /usr/local/bin/java
-javac = /usr/local/bin/javac
+install_sh = ${SHELL} /home/ssharma/svs-research/isp-versions/isp-predictive-binary/install-sh
+jar = /usr/lib/jvm/java-1.6.0-openjdk-amd64/bin/jar
+java = /usr/lib/jvm/java-1.6.0-openjdk-amd64/jre/bin/java
+javac = /usr/lib/jvm/java-1.6.0-openjdk-amd64/bin/javac
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
 localstatedir = ${prefix}/var
 mandir = ${datarootdir}/man
 mkdir_p = /bin/mkdir -p
-mpi_dir = 
-mpicc = /usr/lib64/openmpi/bin//mpicc
-mpicxx = /usr/lib64/openmpi/bin//mpicxx
+mpi_dir = /usr
+mpicc = /usr/bin/mpicc
+mpicxx = /usr/bin/mpicxx
 oldincludedir = /usr/include
 pdfdir = ${docdir}
-prefix = /home/scratch/dlock/fm14/mopper-spo/install
+prefix = /home/ssharma/svs-research/isp-versions/isp-predictive-binary
 program_transform_name = s,x,x,
 psdir = ${docdir}
 sbindir = ${exec_prefix}/sbin
@@ -230,13 +231,14 @@ top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
 AM_LDFLAGS = -pthread $(LIBOPTS_LDADD) $(am__append_1)
-AM_CXXFLAGS = -DHAVE_STDINT_H -Wall $(LIBOPTS_CFLAGS) -O2
-AM_CFLAGS = -DHAVE_STDINT_H -Wall $(LIBOPTS_CFLAGS) -O2 
+AM_CXXFLAGS = -DHAVE_STDINT_H -Wall $(LIBOPTS_CFLAGS) 
+AM_CFLAGS = -DHAVE_STDINT_H -Wall $(LIBOPTS_CFLAGS)  
 #//-O2
 INCLUDES = -I ../solver
 isp_exe_SOURCES = Socket.cpp ServerSocket.cpp MpiProc.cpp Envelope.cpp \
                   name2id.cpp  Scheduler.cpp  Counter.cpp Transition.cpp TransitionList.cpp \
-                  InterleavingTree.cpp utility.cpp Mo.cpp Wu.cpp Encoding.cpp sched-opt.c main.cpp
+                  InterleavingTree.cpp utility.cpp Mo.cpp Wu.cpp Encoding.cpp FMEncoding.cpp \
+	          SPOEncoding.cpp sched-opt.c main.cpp
 
 all: config.hpp
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -344,9 +346,11 @@ distclean-compile:
 include ./$(DEPDIR)/Counter.Po
 include ./$(DEPDIR)/Encoding.Po
 include ./$(DEPDIR)/Envelope.Po
+include ./$(DEPDIR)/FMEncoding.Po
 include ./$(DEPDIR)/InterleavingTree.Po
 include ./$(DEPDIR)/Mo.Po
 include ./$(DEPDIR)/MpiProc.Po
+include ./$(DEPDIR)/SPOEncoding.Po
 include ./$(DEPDIR)/Scheduler.Po
 include ./$(DEPDIR)/ServerSocket.Po
 include ./$(DEPDIR)/Socket.Po

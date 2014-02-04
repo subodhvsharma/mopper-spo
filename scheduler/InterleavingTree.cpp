@@ -31,11 +31,13 @@
 #endif
 
 #include "Encoding.hpp"
+#include "FMEncoding.hpp"
+#include "SPOEncoding.hpp"
+
 #include "util/threeval.h"
 
+
 // [svs] - added equality checking function for pair of CBs
-
-
 bool is_eql(std::pair<CB, CB> p1, std::pair<CB, CB> p2)
 {
   if(p1.first == p2.first && 
@@ -1236,8 +1238,8 @@ int ITree::CHECK (ServerSocket &sock, std::list <int> &l) {
 	    ss << (*lit)._pid << (*lit)._index;
 	  }
 	  std::string matchNumeral = ss.str();
-	  literalt s_ab = sch->e3->matchMap.find(matchNumeral)->second;
-	  switch(sch->e3->slv.l_get(s_ab).get_value()){
+	  literalt s_ab = sch->fm->matchMap.find(matchNumeral)->second;
+	  switch(sch->fm->slv->l_get(s_ab).get_value()){
 	  case tvt::TV_TRUE:
 	    cbl = (*ait);
 	    flag = true;

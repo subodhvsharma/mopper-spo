@@ -19,5 +19,5 @@
  * Date:    January 9th 2009
  */
 
-#include "/usr/include/mpich2//mpi.h"
+#include "/usr/include/mpich2/mpi.h"
 #include "/home/ssharma/svs-research/isp-versions/isp-predictive-binary/include/isp/isp.h"

@@ -73,6 +73,9 @@ int main (int argc, char **argv) {
 
 /* svs -- SAT solving begin */
   int encoding = 0;
+  bool dimacs = false;
+  bool show_formula = false;
+  std::string solver(""); 
 /* svs -- SAT solving end */
 
   //initialize the random generator 
@@ -173,7 +176,21 @@ int main (int argc, char **argv) {
   if(HAVE_OPT(ENCODING)){
     encoding = OPT_VALUE_ENCODING;
   }
-/* svs -- SAT encoding end */
+
+ if(HAVE_OPT(DIMACS)){
+    dimacs = OPT_VALUE_DIMACS;
+  }
+
+ if(HAVE_OPT(SHOW_FORMULA)){
+   show_formula = true;
+ }
+ if(HAVE_OPT(MINISAT)){
+   solver = "minisat";
+ } 
+ else  if(HAVE_OPT(LINGELING)){
+   solver = "lingeling";
+ } 
+ /* svs -- SAT encoding end */
 
   fname = std::string(argv[i++]);
   std::ostringstream fargs_string;
@@ -204,7 +221,7 @@ int main (int argc, char **argv) {
                        report_progress, fib, openmp, use_env_only, 
                        batch_mode, stop_at_deadlock, explore_mode,
                        explore_some, NULL, NULL, NULL, debug, no_ample_set_fix,
-                       bound, limit_output, fprs, encoding);//CGD
+                       bound, limit_output, fprs, encoding, dimacs, show_formula, solver);//CGD
 /* == fprs end == */
 
   if (!quiet && !limit_output) {//CGD

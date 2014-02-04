@@ -708,11 +708,11 @@ bool W::ApplyRefineRuleOne(Node *n, int &redrule1cnt)
 	redrule1cnt++;
 	MPtr->_MSet.erase(mit);
 	//Debug Print
-	// std::cout << "removed a match edge: "
-	// 	  << c  
-	// 	  <<  " --- "  
-	// 	  << d
-	// 	  << std::endl;
+	std::cout << "removed a match edge: "
+		  << c  
+		  <<  " --- "  
+		  << d
+		  << std::endl;
 	
 	//	flag = true;
 	result = true;
@@ -873,11 +873,11 @@ bool W::ApplyRefineRuleTwo(Node *n, int & redrule2cnt)
       remove_flag = false;
  
       //Debug Print
-      // std::cout << "removed a match edge: "
-      // 		<< a  
-      // 		<<  " --- "  
-      // 		<< b
-      // 		<< std::endl;
+      std::cout << "removed a match edge: "
+      		<< a  
+      		<<  " --- "  
+      		<< b
+      		<< std::endl;
       
       ret = true;
       

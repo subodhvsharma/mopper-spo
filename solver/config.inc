@@ -11,7 +11,7 @@ LINGELING = ../../lingeling-ats-57807c8-131016
 #CHAFF = ../../zChaff
 #BOOLEFORCE = ../../booleforce-0.4
 #MINISAT = ../../MiniSat-p_v1.14
-#MINISAT2 = ../../minisat-2.2.0
+MINISAT2 = ../../minisat-2.2.0
 #GLUCOSE = ../../glucose2.2
 #SMVSAT =
 

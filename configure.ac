@@ -259,7 +259,7 @@ AC_CHECK_FUNCS([gethostbyname memmove memset select socket strdup])
 AC_DISABLE_SHARED
 case "${enable_local_libopts+set}" in
  set) ;;
- *) enable_local_libopts=yes ;;
+  *) enable_local_libopts=yes ;;
 esac
 case "${enable_libopts_install+set}" in
  set) ;;

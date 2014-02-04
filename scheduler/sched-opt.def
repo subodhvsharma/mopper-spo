@@ -46,8 +46,34 @@ flag = {
     value     		= E;
     arg-type  		= number;
     arg-default 	= 0;
-    arg-range		= "0->2";
-    descrip   		= "SAT encoding type";
+    arg-range		= "0->1";
+    descrip   		= "SAT encoding type: 0 for FM, 1 for PLDI";
+};
+
+flag = {
+    name		= dimacs;
+    value     		= D;
+    arg-type            = boolean;
+    arg-default         = false;
+    descrip   		= "Output dimacs file";
+};
+
+flag = {
+    name		= show_formula;
+    value               = C;
+    descrip   		= "Show verification conditions file";
+};
+
+flag = {
+    name		= minisat;
+    descrip   		= "Use minisat tool to solve";
+    flags-cant          = lingeling;
+};
+
+flag = {
+     name               = lingeling;
+    descrip   		= "Use minisat tool to solve";	
+    flags-cant          = minisat;
 };
 
 flag = {
