@@ -1,0 +1,26 @@
+=======
+
+1) MPICC should be installed on the system. An easy way to install MPICC is by installing
+MPICH2.  
+
+2) Install the solver
+   a) Go to the solver directory
+   b) make
+
+3) Install ISP+MOPPER 
+./configure --prefix="Some Directory" --disable-gui --enable-optional-ample-set-fix --with-mpi-inc-dir=<path to mpi.h file>
+make
+make install
+
+NOTE: The implementation is tested on Linux 2.6.32-51 and  3.2.0-51 (Ubuntu 12.04) with GCC version 4.4.3 and 4.6.3.
+
+==== 
+If build errors persist, you may have to perform autoreconf 
+
+autoreconf --force
+./configure --prefix="Some Directory"
+make
+make install
+
+
+***

@@ -1,0 +1,126 @@
+#ifndef __WAIT_FOR__
+#define __WAIT_FOR__
+
+#include "InterleavingTree.hpp"
+#include "Mo.hpp"
+#include <vector>
+#include <set>
+#include <cassert>
+#include <map>
+
+
+//typedef std::pair<CB, CB> WE;
+typedef std::pair<int, int> WE;
+struct mapComp {
+  bool operator () ( const WE & fst, const WE& snd) const
+    
+  {
+    if (fst.first < snd.first) return true;
+    else if (fst.first == snd.first && fst.second < snd.second) return true;
+    else
+      return false;
+    
+  }
+
+};
+
+typedef std::multimap<WE,WE, mapComp> _W; // first WE is the process id pair and the second is the index pair
+typedef std::multimap<WE, WE, mapComp> ::iterator _WIterator;
+//typedef std::vector<WE> _W;
+//typedef std::vector<WE>::iterator _WIterator;
+
+
+class W {
+
+public:
+  W();
+  ~W(){}
+
+  /*
+     Checks if p is present in _WSet
+   */
+  // _WIterator IsPresent(WE &a);
+  _WIterator IsPresent(std::pair<CB, CB> p);
+
+
+  /* 
+     Checks if two operations are Wait-for ordered
+   */
+  bool AreWOrdered(std::pair<CB, CB> p, Node *);
+
+  /*
+    Removes the entry from _WSet
+   */
+
+  void RemoveWE(std::pair<CB, CB> ); 
+
+  /*
+    Removes redundant Wait-for edges from the transitive closure
+   */
+  void RefineW();
+
+  /*
+    Adds an entry to _Wset
+   */
+
+  void AddWE(std::pair<CB, CB> p);
+
+  /*
+    Adds an WE edge from CB to every entry in the set
+  */
+  void AddWESet(CB, std::set<int>, int);
+  
+  /*
+    Computes the transitive closure of _Wset
+  */
+  void TransitiveClosure (Node * nlast);
+
+
+  /*
+    Returns the Last WE edge between a pair of processes i and j 
+    The function argument is one of the WE edges between i and j
+  */
+  std::pair<CB, CB> LastWE(std::pair<CB, CB> p);
+
+  /*
+    Pretty print of WE 
+  */
+  friend std::ostream &operator<< (std::ostream &os, const W &c);
+
+
+  /*
+    WConstruct -- iterates for each matched event in the trace
+    and constructs a WE by calling _WConstructInternal
+   */
+  void _WConstructInternal(Node*, Node*);
+  void _WConstruct(ITree*);
+
+  bool Balance(Node *n, CB recv, CB send);
+
+  /*Refinement rules for removing false M^o edges */
+  bool ApplyRefineRuleOne(Node *);
+  bool ApplyRefineRuleTwo(Node *);
+
+  void DeadlockDetection(std::vector<std::list <CB> > al, Node *);
+  
+  //bool Deadlocks(CB c); // if the operation is a deterministic receive
+
+  //  bool Deadlocks(CB a, CB b, CB c ); // if the send is a source of a wait for dependency
+
+  void RemoveMatchedSends(std::set<CB> &res, std::vector<std::list<CB> > l);
+
+  void RemoveWorderedSends(std::set<CB> &res, CB s, Node *n);
+
+  void ChooseFirst(std::set<CB> &res);
+
+  std::set<CB> FindEnabledSends(CB s, CB r, std::vector<std::list<CB> > l, Node *n);
+    
+
+  M * MPtr;
+
+  _W _WSet;
+  
+};
+
+void print(std::set<CB> l);
+#endif
