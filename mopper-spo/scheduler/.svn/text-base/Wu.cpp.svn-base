@@ -1,0 +1,1101 @@
+#include "Wu.hpp"
+#include "utility.hpp"
+
+extern bool is_eql(std::pair<CB, CB> p1, std::pair<CB, CB> p2);
+
+
+
+W::W() {
+
+}
+
+std::ostream & operator<<(std::ostream &os, const W &c)
+{
+  
+// std::vector<WE>::const_iterator it, it_end;
+
+  // it_end = c._WSet.end();
+  
+  // os << "W["<< std::endl;
+  
+  // if(c._WSet.empty()){
+  //   os <<  "EMPTY _WSet" << std::endl;
+  // }
+  
+  // else {
+  // for (it = c._WSet.begin(); it !=it_end;  it ++ ){
+  //   os << (*it).first << "," << (*it).second <<std::endl;
+  //   // os << "[" << (*it).first.first << "," << (*it).second.first << "]" 
+  //   //    << "," << "[" << (*it).first.second << "," << (*it).second.second << "]" std::endl;
+  // }
+  // os <<"]\n";
+  // }
+
+  std::multimap<WE, WE, mapComp>::const_iterator it , it_end;
+  it_end = c._WSet.end();
+
+  
+  if(c._WSet.empty()){
+    os <<  "EMPTY _WSet" << std::endl;
+  }
+
+  else {
+    os << "W["<< std::endl;
+    for (it = c._WSet.begin(); it !=it_end;  it ++ ){
+     os << "[" << (*it).first.first << "," << (*it).second.first << "]" 
+        << "-->" 
+	<< "[" << (*it).first.second << "," << (*it).second.second << "]" 
+	<< std::endl;
+  }
+  os <<"]\n";
+  }
+
+
+  return os;
+}
+
+// _WIterator W::IsPresent(WE  & p)
+// {
+//   CB c1 = p.first;
+//   CB c2 = p.second;
+  
+//   if(c1._pid == -1 || c2._pid == -1 ||
+//      c1._index == -1 || c2._index == -1) 
+//     assert(false);
+  
+//   // if(c1.first == -1 || c1.second == -1 ||
+//   //    c2.first == -1 || c2.second == -1)
+//   //   assert(false);
+  
+//   _WIterator it, it_end;
+  
+  
+//   it_end = _WSet.end();
+  
+//   for(it = _WSet.begin(); it != it_end; it++)
+//     if( is_eql(p, (*it)) )
+//       return it;
+
+//   return it; 
+// }
+
+
+
+_WIterator W::IsPresent(std::pair<CB,CB> p)
+{
+  // a is the key <pid1, pid2>
+  // b is the index values <ind1, ind2>
+  std::pair <int, int> a = std::pair<int, int>(p.first._pid, p.second._pid);
+  
+  std::pair <int, int> b = std::pair<int, int>(p.first._index, p.second._index);
+ 
+  if(a.first == -1 || a.second == -1 ||
+     b.first == -1 || b.second == -1) 
+    assert(false);
+  
+  _WIterator it, it_end;
+  
+  
+  it_end = _WSet.end();
+  
+  std::pair <_WIterator, _WIterator> ret;
+  
+  ret = _WSet.equal_range(a);
+  
+
+  for(it = ret.first; it != ret.second; it++)
+    if((*it).second.first == b.first && (*it).second.second == b.second)
+      return it;
+
+  return it_end; 
+}
+
+bool W::AreWOrdered(std::pair<CB, CB> p, Node *n)
+{
+  if(IsPresent(p) != _WSet.end()) return true;
+  
+  else{
+    CB from = p.first;
+    CB to = p.second;
+    
+    std::pair <_WIterator, _WIterator> ret;
+    ret = _WSet.equal_range(std::pair<int, int>(from._pid, to._pid));
+    
+    _WIterator it;
+    for(it = ret.first; it != ret.second; it ++){
+      int findex = (*it).second.first;
+      int tindex = (*it).second.second;
+      
+      if(findex < from._index && tindex > to._index){
+	CB fromAncs(from._pid, findex);
+	CB toDesc (to._pid, tindex);
+	
+	if(n->isAncestor(from, fromAncs) && n->isAncestor(toDesc, to))
+	  return true;
+      }
+      
+    }
+    return false;
+  }
+  return false;
+}
+
+
+
+
+/* Not called at the moment */
+
+ void W::RemoveWE(std::pair<CB, CB> p)
+ {
+//   _WIterator  i = IsPresent(p);
+
+//   if(i != _WSet.end())
+//     _WSet.erase(i);
+   
+   std::pair <int, int> a = std::pair<int, int>(p.first._pid, p.second._pid);
+ 
+   std::pair <int, int> b = std::pair<int, int>(p.first._index, p.second._index);
+   
+   _WIterator it = IsPresent(p);
+   
+   if(it != _WSet.end()){
+     _WSet.erase(it);
+
+      //Debug Print
+      std::cout << "removed a wait-for edge: "
+		<< p.first  
+		<<  " ---> "  
+		<< p.second
+		<< std::endl;
+
+   }
+
+ }
+
+// void W::AddWE(std::pair<CB, CB> p)
+// {
+//     _WIterator it = IsPresent(p);
+
+//     if(it == _WSet.end()){
+//       _WSet.push_back(p);
+      
+//       //Debug Print
+//       std::cout << "added a wait-for edge: " << p.first << " ---> " << p.second << std::endl;
+//     }
+
+   
+// }
+
+
+void W::AddWE(std::pair<CB, CB> p)
+{
+
+  std::pair <int, int> a = std::pair<int, int>(p.first._pid, p.second._pid);
+  
+  std::pair <int, int> b = std::pair<int, int>(p.first._index, p.second._index);
+
+  _WIterator it = IsPresent(p);
+
+    if(it == _WSet.end()){
+      _WSet.insert(std::pair <WE, WE> (a,b));
+      
+      //Debug Print
+      std::cout << "added a wait-for edge: "
+		<< p.first  
+		<<  " ---> "  
+		<< p.second
+		<< std::endl;
+    }
+   
+}
+
+
+
+void W::RefineW()
+{
+ /*
+      for each edge a--->b
+      remove any edge Desc+(a) --->Ancs*(b)
+     */
+    _WIterator it_end;
+    _WIterator it1, it2;
+    
+    bool restart;
+
+
+    do{
+      
+      restart = false;
+      it_end = _WSet.end();
+       
+     
+      for(it1 = _WSet.begin(); it1 != it_end; it1++){
+	
+	CB a = CB ((*it1).first.first, (*it1).second.first); 
+	CB b = CB ((*it1).first.second, (*it1).second.second); 
+	
+    		
+    	for(it2 = _WSet.begin(); it2 != it_end; it2++){
+    	  
+	  // CB c = (*it2).first;
+    	  // CB d = (*it2).second;
+	  CB c = CB ((*it2).first.first, (*it2).second.first); 
+	  CB d = CB ((*it2).first.second, (*it2).second.second); 
+	  
+	  if(c._pid == a._pid && c._index > a._index && 
+	     d._pid == b._pid && d._index <= b._index){
+	    
+	    RemoveWE(std::pair<CB, CB>(c,d));
+	    restart = true;
+	    break;
+	  }
+	
+    	}
+	if(restart){
+	  break;
+	}
+
+      }
+    }while(restart);
+}
+
+
+void W::AddWESet(CB cfrom, std::set <int> scb, int pid) {
+
+  std::set<int>::iterator it, it_end;
+  it_end = scb.end();
+
+  //  std::cout << cfrom << " to aset: [ " ;
+  
+  for(it = scb.begin(); it != it_end; it++) {
+    //    CB cto = *(new CB(pid, *it));
+    CB cto(pid, *it);
+  
+    //std::cout << *it << " " ;
+    
+    AddWE(std::pair<CB, CB>(cfrom, cto));
+  }
+
+  //std::cout << "]\n"; 
+}
+
+
+// TO DO -- CHECK THIS FUNCTION THOROUGHLY
+void W::TransitiveClosure(Node *nlast)
+{
+  
+  _WIterator _vit, _vitend, _vit1, _vit2;
+  bool restart;
+  
+  
+  // __restart:
+
+  do{
+    restart = false;
+    _vitend = _WSet.end();
+    
+    //    std::cout << "=============Restarting ==============" <<std::endl;
+    //   std::cout << "_WSet size = " <<_WSet.size() << std::endl;
+
+    for(_vit = _WSet.begin(); _vit != _vitend; _vit++){
+      
+      //      CB a = (*_vit).first;   // a
+      // CB b = (*_vit).second;  // b
+      
+      CB a = CB ((*_vit).first.first, (*_vit).second.first); 
+      CB b = CB ((*_vit).first.second, (*_vit).second.second); 
+
+      
+      //Debug Print
+      //std::cout << " a--->b" <<std::endl;
+      //std::cout << a << "---->" << b <<std::endl;
+      
+      /*
+  	iterate over each entry of _WSet c--->d
+  	add a--->d iff
+  	1) c is Ancs*(b) 
+  	2) d is not in Ancs^+(a)
+  	3) a --> Desc*(d) does not exist
+      */
+      
+      
+      
+      for(_vit1 = _WSet.begin(); _vit1 != _vitend; _vit1++) {
+	
+  	// CB c= (*_vit1).first;  //c
+  	// CB d = (*_vit1).second; // d
+
+	CB c = CB ((*_vit1).first.first, (*_vit1).second.first); 
+	CB d = CB ((*_vit1).first.second, (*_vit1).second.second); 
+ 
+ 	bool flag = true;;
+	
+  	//Debug Print
+	
+  	//std::cout << "\t " << c << "---->" << d <<std::endl;
+  	//std::cout.flush();
+	
+  	if(c._pid == b._pid && c._index <= b._index){
+  	  // proceed only when c in Ancs*(b)
+  	  if( d._pid != a._pid) {
+  	    // make sure d is not from Proc(a) -- avoiding circularity  
+  	    for(_vit2 = _WSet.begin(); _vit2 != _vitend; _vit2++) {
+  	      // check if a --> _vit2.second: _vit2.second is in the 
+  	      // desc*(d)
+	      CB e = CB ((*_vit2).first.first, (*_vit2).second.first); 
+	      CB f = CB ((*_vit2).first.second, (*_vit2).second.second); 
+
+  	      if( e == a && f._pid == d._pid 
+  		  && f._index >= d._index){
+  		flag = false;
+  		continue;
+  	      }
+  	    }
+  	    if (flag){ 
+  	      AddWE(std::pair<CB, CB>(a, d));
+  	      //std::cout << "breaking out of inner loop" <<std::endl;
+  	      restart = true;
+  	      break;
+  	    }
+  	  }
+  	  else{
+  	    if(d._index > a._index){
+  	      AddWE(std::pair<CB, CB>(a, d));
+  	      restart = true;
+  	      //std::cout << "just found a deadlock breaking out of inner loop" <<std::endl;
+  	      break;
+  	    }
+  	  }
+	  
+  	}
+	
+      }
+
+      if(restart){
+  	//std::cout << "breaking out of outer loop" <<std::endl;
+  	break;
+      }
+    }
+    //std::cout << "restart value : " << restart <<std::endl;
+  }while(restart);
+}
+
+
+std::pair<CB, CB> W::LastWE(std::pair<CB, CB> p)
+{
+  CB from = p.first;
+  CB to = p.second;
+  
+  int src_pid = from._pid;
+  int dest_pid = to._pid;
+  
+  _WIterator _vit, _vitend;
+  
+  _vitend = _WSet.end();
+
+  for(_vit = _WSet.begin(); _vit != _vitend; _vit++){
+    
+    //    CB _wfrom = (*_vit).first;
+    //    CB _wto = (*_vit).second;
+    
+    CB _wfrom = CB ((*_vit).first.first, (*_vit).second.first);
+    CB _wto = CB ((*_vit).first.second, (*_vit).second.second);;
+
+    if( _wfrom._pid == src_pid && _wto._pid == dest_pid){
+
+      if( _wfrom._index >= from._index && _wto._index >= to._index ){
+
+	from = _wfrom;
+	to = _wto;
+
+      }
+    }
+  }
+
+  return (std::pair<CB, CB>(from, to));
+}
+
+
+
+void W::_WConstructInternal(Node *ncurr, Node *nlast) {
+  
+  int _psrc = ncurr->curr_match_set.front()._pid; // sending process pid
+  int _pdst = ncurr->curr_match_set.back()._pid;  // recv process pid
+
+
+
+  /* get differential count between <Scurr, Rcurr> */
+  int _diff = ncurr->_countracker.getDiffCount(_psrc, _pdst);
+  int _ldiff = nlast->_countracker.getDiffCount(_psrc, _pdst);
+
+
+  std::vector<int> _list;
+  std::set<int> _aset;
+
+  /*
+    Cases only for WE edges from Scurr only 
+  */
+   _aset.clear();
+   _list.clear();
+
+
+
+  if(_diff == 0) {
+    /*         
+                OP Immediate Ancestor of Rcurr
+	      ^ | 
+	     /  |
+            /   |
+      Scurr ----Rcurr
+      
+     */
+
+    _list.push_back(ncurr->curr_match_set.back()._index);
+    _aset = getImmediateAncestorList(ncurr, _pdst, _list);
+
+
+
+    
+    /* Debug-Print
+       ===========
+    */
+    
+    /*
+      std::set<int>::iterator _sit;
+      std::cout << "aset for " << ncurr->curr_match_set.back() << "[ "; 
+      for(_sit = _aset.begin(); _sit != _aset.end(); _sit++) {
+      std::cout << *_sit << " ";
+      }
+      std::cout <<" ]\n";
+      std::cout.flush();
+    */
+    
+    if(!_aset.empty())
+      AddWESet(ncurr->curr_match_set.front(), _aset, _pdst);
+
+    //Debug Print
+    //std::cout << " Send:Iam in _diff == 0" <<std::endl;
+  }
+  else {
+    
+      /*         
+                OP Immediate Ancestor of M^o(Scurr)
+	      ^ | 
+	     /  |
+            /   |
+      Scurr ----Rcurr
+      
+     */
+    
+    std::set<CB> coi = MPtr->MImage(ncurr->curr_match_set.front());
+    CB firstcb = MPtr->FirstM(coi, _pdst);
+    
+   
+    
+    _list.push_back(firstcb._index);
+    _aset = getImmediateAncestorList(ncurr, _pdst, _list);
+    
+
+
+    if(!_aset.empty())  
+      AddWESet(ncurr->curr_match_set.front(), _aset, _pdst); 
+    
+    // Debug Print
+    // std::cout << " Send:Iam in _diff != 0" <<std::endl;
+    
+  }
+
+
+  /*
+    Cases only for WE edges from Rcurr only 
+  */
+  
+   _aset.clear();
+   _list.clear();
+    
+  if(_diff == 0 && _ldiff == 0) {
+  /*         
+                OP Immediate Ancestor of Scurr
+	      ^ | 
+	     /  |
+            /   |
+      Rcurr ----Scurr
+      
+     */
+    
+   
+    
+    _list.push_back(ncurr->curr_match_set.front()._index);
+    _aset = getImmediateAncestorList(ncurr, _psrc, _list);
+    
+
+
+    if(!_aset.empty())
+      AddWESet(ncurr->curr_match_set.back(), _aset, _psrc);
+
+    // Debug Print
+    //std::cout << " Recv:Iam in _diff == 0 && _ldiff == 0" <<std::endl;    
+  }
+
+  else if( _ldiff != 0){
+    
+    Envelope *env = ncurr->GetTransition(ncurr->curr_match_set.back())->GetEnvelope();
+    
+    if(!env->src_wildcard) {
+      /*
+	Rcurr ---> Imm_Ancs(FirstM(Rcurr))
+      */
+      
+      // Debug Print
+      // std::cout << " Recv:Iam in  _ldiff != 0 and rec is det" <<std::endl;
+      
+      std::set<CB> coi = MPtr->MImage(ncurr->curr_match_set.back());
+      
+      //Debug Print
+      //std::cout << "coi size = " << coi.size() <<std::endl;
+      
+      /* Debug-Print
+	 ===========
+      */
+      
+      
+      // std::set<CB>::iterator _it;
+      // std::cout << "coi for " <<  ncurr->curr_match_set.back() << ":[ "; 
+      // for(_it = coi.begin(); _it != coi.end(); _it++) {
+      // 	std::cout << *_it << std::endl;
+      // }
+      // std::cout <<" ]\n";
+      // std::cout.flush();
+	    
+      CB firstcb = MPtr->FirstM(coi, _psrc);
+      
+      //Debug Print
+      //std::cout << "firstcb = " << firstcb <<std::endl;
+
+      _list.push_back(firstcb._index);
+      _aset = getImmediateAncestorList(ncurr, _psrc, _list);
+    
+      if(!_aset.empty())  
+	AddWESet(ncurr->curr_match_set.back(), _aset, _psrc); 
+      
+      // Debug Print
+      //std::cout << "Recv:Iam in  _ldiff != 0 and rec is det" <<std::endl;
+      
+    }
+
+    else {
+      /*
+	Rcurr ---> LastM(Op1):
+	1) Op1 is the first Ancestor of Scurr
+	2) Such that M^o(Op1) \subset Ancs^+(Rcurr)
+      */
+      std::set<int> _iancestors;
+      CB op1, lastcb;
+      _list.push_back(ncurr->curr_match_set.front()._index);
+      
+      
+
+      while(1) {
+
+	std::set<int>::iterator it, it_end;
+	
+	_iancestors = getImmediateAncestorList(ncurr, _psrc, _list);
+	
+	
+	if(_iancestors.empty()){
+	 
+	  //Debug Print
+	  //std::cout<<" Breaking out _iancs is empty" <<std::endl;
+
+	  break;
+	}
+	
+	it_end = _iancestors.end();
+	for(it = _iancestors.begin(); it != it_end; it++){
+	 
+	  op1 = CB(_psrc, *it);
+	  
+	  Envelope *e = ncurr->GetTransition(op1)->GetEnvelope();
+	  
+	  if( e->isSendType() && !(e->dest == _pdst) )
+	    continue;
+	  else if (e->isRecvTypeOnly() &&  !e->src_wildcard && !(e->src == _pdst)) 
+	    continue;
+	  else if (e->isRecvTypeOnly() &&  e->src_wildcard && !MPtr->CheckMImage(op1, _pdst)) 
+	    continue;
+	  
+	  std::set<CB> coi = MPtr->MImage(op1);
+	  
+	  
+	
+	  /* Debug-Print
+	     ===========
+	  */
+	  
+	  
+	    // std::set<CB>::iterator _it;
+	    // std::cout << "coi for " << op1 << ":[ "; 
+	    // for(_it = coi.begin(); _it != coi.end(); _it++) {
+	    // std::cout << *_it << std::endl;
+	    // }
+	    // std::cout <<" ]\n";
+	    // std::cout.flush();
+	  
+    
+	  
+	  lastcb = MPtr->LastM(coi, _pdst);
+
+	  //Debug Print
+	  //std::cout << "lastcb = " << lastcb <<std::endl;
+
+	  if(lastcb._index != -1 &&
+	     lastcb._index < ncurr->curr_match_set.back()._index){
+	    _aset.insert(op1._index);
+	    
+	    //Debug Print
+	    // std::cout<<" Breaking out - found a lastcb = " << lastcb << std::endl;
+	    
+	    break;
+	  }
+	  else{
+	    op1 = CB(-1, -1);
+	    lastcb = CB(-1, -1);
+	  }
+	    
+	}
+	
+	if(op1._pid == -1 && lastcb._pid == -1){
+	  
+	  _list.clear();
+	  for(it = _iancestors.begin(); it != it_end; it++) 
+            _list.push_back(*it);
+	}
+	else
+	  break;
+      } // while(1) ends
+      
+      if(!_aset.empty())
+	AddWESet(ncurr->curr_match_set.back(), _aset, _psrc); 
+      
+      //Debug Print
+      //std::cout << " Recv:Iam in  _ldiff != 0 and rec is nondet" <<std::endl; 
+    } // else ends
+    
+  }
+
+  else
+    assert(false);
+    
+}
+
+
+
+void W::_WConstruct(ITree *itree) {
+  Node *ncurr, *nlast;
+
+  // get the last node of itree
+  nlast = itree->_slist[itree->_slist.size()-1];
+
+  std::vector<Node*>::iterator _slist_it, _slist_it_end;
+
+  _slist_it_end = itree->_slist.end();
+
+  int i = 0;
+
+  for(_slist_it = itree->_slist.begin(); 
+      _slist_it != _slist_it_end; _slist_it++, ++i) {
+    
+    ncurr = *(_slist_it);
+    
+    /* check to make sure the curr_match_set is not garbage
+     For collective operations -- curr_match_set is not 
+     populated correctly by ISP and therefore it can contain
+     garbage values.
+    */
+    if(ncurr->curr_match_set.back()._pid >= ncurr->NumProcs())
+      continue;
+    
+    Envelope *env = ncurr->GetTransition(ncurr->curr_match_set.back())->GetEnvelope();
+
+    //std::cout << *(ncurr->GetTransition(ncurr->curr_match_set.back()))<<std::endl;
+    //std::cout << i << std::endl;
+
+    if(ncurr->curr_match_set.size() == 2 && env->isRecvTypeOnly()){
+      
+      //std::cout<< "WCounstructDet called for Node with match \n"<<ncurr->curr_match_set.front()<<ncurr->curr_match_set.back()<<std::endl;
+
+          _WConstructInternal(ncurr, nlast);
+    }
+  }
+}     
+
+
+
+
+//////////////////////////////////////////////////////
+//                                                /// 
+//       Refinement Rules for M^o                ///  
+///////////////////////////////////////////////////
+
+bool W::ApplyRefineRuleOne(Node *n) 
+{
+  /*
+   * Algorithm:
+   * for each wfr a->b
+   *  for each c in Desc*(a) 
+   *      for each d in Ancs*(b)
+   *          if (c,d) in M
+   *              remove (c,d) from M
+   */
+  
+  _WIterator wit, witend;
+  bool remove_flag = false;
+  bool result = false;
+
+  _MIterator mit, mitend;
+  
+  
+  witend = _WSet.end();
+
+  for(wit = _WSet.begin(); wit != witend; wit++) {
+    
+    
+    // a--->b 
+    CB a ((*wit).first.first, (*wit).second.first); 
+    CB b ((*wit).first.second, (*wit).second.second); 
+    
+    std::pair<_MIterator, _MIterator> ret;
+    std::cout << a << " ---->"<< b << ":" <<std::endl; 
+    
+  _restart:
+    //mitend = MPtr->_MSet.end();
+    ret = MPtr->_MSet.equal_range((*wit).first);
+    
+    for(mit = ret.first; mit != ret.second; mit++){
+      
+      // c --- d
+      CB c ((*mit).first.first, (*mit).second.first);
+      CB d ((*mit).first.second, (*mit).second.second);
+      
+      std::cout << c << " ----"<< d << std::endl; 
+      
+      if( c._pid == a._pid && d._pid == b._pid) {
+	if((n->isAncestor(c, a) && n->isAncestor(b,d)) ||
+	   (c == a && d == b))
+	  remove_flag = true;
+      }
+      
+      else if (c._pid == b._pid && d._pid == a._pid){
+	if((n->isAncestor(b,c) && n->isAncestor(d,a)) ||
+	   (c == b && d == a))
+	  remove_flag = true;
+      }
+      else continue;
+      
+      if(remove_flag){
+
+	MPtr->_MSet.erase(mit);
+	//Debug Print
+	// std::cout << "removed a match edge: "
+	// 	  << c  
+	// 	  <<  " --- "  
+	// 	  << d
+	// 	  << std::endl;
+	
+	//	flag = true;
+	result = true;
+	goto _restart;
+	//break;
+      }
+      // if(flag){ 
+      // 	flag = false;
+      // 	goto _restart;
+      // }
+      
+    }
+  }
+  return result;
+}
+
+bool W::Balance(Node *n, CB recv, CB send)
+{
+
+  std::vector<int> priorRecv, tmp;
+  std::set<CB> Msends;
+  
+  tmp = n->getAllAncestors(recv);
+  
+  std::vector<int>::iterator it;
+  
+  /*priorRecv = GetAllPriorRecv(recv); */
+  
+  for( it = tmp.begin();it != tmp.end(); it++){
+    
+    Transition* t  = n->GetTransition(recv._pid, *it);
+    
+    if(t->GetEnvelope()->isRecvType()){
+
+      priorRecv.push_back(*it);
+      
+    }
+  
+  }
+    
+  /*for each recv in priorRecv get the potential Match set
+    excluding any send that is Wait-for ordered w.r.t "send"
+  */
+  
+  for(it = priorRecv.begin(); it != priorRecv.end(); it++){
+
+    CB r (recv._pid, *it);
+    
+    std::set<CB> tmp1 = MPtr->MImage(r);
+    std::set<CB> tmp2;
+    
+    std::set<CB>::iterator sit;
+    
+    for(sit = tmp1.begin(); sit != tmp1.end(); sit++){
+      
+      if(!AreWOrdered(std::pair<CB,CB>(*sit, send), n))
+	if(!n->isAncestor(*sit, send) && (*sit)._pid != send._pid && 
+	   (*sit)._index != send._index) 
+	  tmp2.insert(*sit); 
+    }
+     
+    if (tmp2.size() == 0)
+      return false;
+
+    else
+      Msends.insert(tmp2.begin(), tmp2.end());
+  }
+
+  if(priorRecv.size() > Msends.size())
+    return false;
+  
+  return true;
+  
+}
+
+bool W::ApplyRefineRuleTwo(Node *n)
+{
+  /*
+   * Algorithm
+   * - For each potential match edge [a,b](barring the actual match edge) in M
+   * - see if every "b" type operation in the Ancs+(b) has a legal match
+   * - while doing the previous check, make sure that no sends of type a 
+   *   are non -overtaking ordered 
+   */
+
+  _MIterator mit, mitend;
+  
+  mitend = MPtr->_MSet.end();
+  
+
+  bool ret =false;
+  bool remove_flag = false;
+
+ _restart:
+    
+  for(mit =  MPtr->_MSet.begin(); mit != mitend; mit++){
+    
+    CB a = CB ((*mit).first.first, (*mit).second.first); 
+    CB b = CB ((*mit).first.second, (*mit).second.second); 
+
+    Transition * t1 = n->GetTransition(a);
+    Transition * t2 = n->GetTransition(b);
+    
+    if (t1->GetEnvelope()->src == WILDCARD)  {
+
+      if(!Balance(n,a,b)){
+	remove_flag = true;
+	ret = true;
+      }
+    }
+    
+    else if(t2->GetEnvelope()->src == WILDCARD){
+      
+      if(!Balance(n,b,a)){
+	remove_flag = true;
+	ret = true;
+      }
+    }
+    
+    else continue;
+    
+    if(remove_flag){
+      
+      MPtr->_MSet.erase(mit);
+      remove_flag = false;
+      goto _restart;
+    }
+    
+  }
+  
+  return ret;
+}
+
+
+void W::RemoveMatchedSends(std::set<CB> &res, std::vector<std::list<CB> > l)
+{
+  std::vector<std::list<CB> >::iterator lit, lit_end;
+ 
+  lit_end = l.end();
+  
+  for(lit = l.begin(); lit != lit_end; lit++){
+    
+    CB s = (*lit).front();
+    
+    std::set<CB>::iterator mit; 
+
+    mit = res.find(s);
+    
+    if( mit != res.end()){
+
+      res.erase(mit);
+      
+    }
+
+  }
+  
+}
+
+
+void W::RemoveWorderedSends(std::set<CB> &res, CB s, Node *n)
+{
+  std::set<CB>::iterator rit, rit_begin, rit_end;
+
+  rit_end = res.end();
+
+  rit_begin = res.begin();
+
+ _restart:
+  rit = rit_begin;
+  for (; rit != rit_end; rit ++){
+    
+    if (AreWOrdered(std::pair<CB, CB> (*rit, s), n ) ){
+      
+      rit_begin = --rit;
+
+      res.erase(*rit); 
+      
+      goto _restart;
+      
+    }
+
+  }
+
+}
+
+void W::ChooseFirst(std::set<CB> &res)
+{
+  std::set<CB>::iterator rit, rit_end, rit1;
+
+  rit_end = res.end();
+
+  std::set<CB> tmp;
+  
+  for(rit = res.begin(); rit != rit_end; rit ++){
+
+    CB min;
+
+    min = *rit;
+    
+    for(rit1 = res.begin(); rit1 != rit_end; rit1 ++){
+      
+      if ( min._pid == (*rit1)._pid && min._index > (*rit1)._index)
+	min = *rit1;
+      
+    }
+
+    tmp.insert(min);
+    
+  }
+
+  res.clear();
+
+  res.insert(tmp.begin(), tmp.end());
+  
+}
+
+std::set<CB> W::FindEnabledSends(CB s, CB r, std::vector<std::list<CB> > l, Node *n)
+{
+
+  
+  /*r -- its a receive
+   res = M^o(r) -- Potential match image of operation c */
+  std::set<CB> res = MPtr->MImage(r);
+  
+  /*res <--- res / l --- remove all those sends that have matched so far
+    NOTE: Does it include the target of Wait-for dependency S??
+   */
+  RemoveMatchedSends(res, l);
+
+  /*
+    Remove any send that is Wait-for ordered or IntraMB ordered w.r.t. S
+  */
+  RemoveWorderedSends(res, s, n);
+  
+
+  /*
+    Choose the first ordered send from each process
+   */
+  ChooseFirst(res);
+
+  return res;
+
+}
+
+
+void W::DeadlockDetection(std::vector<std::list <CB> > al, Node *last)
+{
+  std::vector<std::list<CB> >::iterator ait, aitend;
+
+  aitend = al.end();
+
+  for(ait = al.begin(); ait != aitend; ait ++){
+    
+    if((*ait).size() == 2){
+
+      CB front = (*ait).front();
+      CB back = (*ait).back();
+
+      Envelope *fronte = last->GetTransition(front)->GetEnvelope();
+      Envelope *backe =  last->GetTransition(back)->GetEnvelope();
+      
+      if( fronte->isSendType() && backe->isRecvType() ) {
+	
+	if(backe->src != WILDCARD){
+
+	  /* Det recv deadlock rule*/
+	  
+	}
+	
+	std::set<CB> enabledSends = FindEnabledSends(front, back, al, last);
+
+	print(enabledSends);
+
+	
+      }
+
+    }
+        
+  }
+    
+}
+
+void print(std::set<CB> l){
+
+  std::set<CB>::iterator lit, lit_end;
+
+  lit_end = l.end();
+
+  std::cout << "[" << std::endl;
+  
+  for (lit = l.begin(); lit != lit_end; lit ++){
+
+    std::cout << *lit << std::endl;
+    
+  }
+  std::cout << "]" << std::endl;
+  
+}

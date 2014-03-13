@@ -1,0 +1,122 @@
+#include<utility.hpp>
+
+std::set<int> getImmediateAncestorList (Node *ncurr, int _pid, std::vector<int> &_list) 
+{
+  std::set<int>  _ancestor;
+  std::vector<int> _tancestor;
+  std::vector<int>::iterator _lit, _litend;
+  _litend = _list.end();
+  
+  for(_lit = _list.begin(); _lit != _litend; _lit++) {
+    Transition *_t = ncurr->GetTransition(_pid, *_lit);
+    _tancestor = _t->get_ancestors();   
+    _ancestor.insert(_tancestor.begin(), _tancestor.end());
+  }
+
+  //std::cout << "Printing Ancestor List : [";
+  //std::vector<int>::iterator sit, sit_end;
+  //for(sit = _tancestor.begin(); sit != _tancestor.end(); sit++) {
+  //  std::cout << *sit << ",";   
+  //}
+  //std::cout << "]\n";
+  
+  return _ancestor;
+}
+
+std::set<int> getAllAncestorList(Node *ncurr, CB c) 
+{
+  std::set<int> _allancestors, _iancestors;
+  std::vector<int> _ilist;
+  _ilist.push_back(c._index);
+  unsigned int size;
+    
+  while(1){
+    std::set<int>::iterator it, it_end;
+    
+    _iancestors = getImmediateAncestorList(ncurr, c._pid, _ilist);
+    
+    if(_iancestors.empty())
+      break;
+    
+    it_end = _iancestors.end();
+    _ilist.clear();
+    
+    for(it = _iancestors.begin(); it != it_end; it++) {
+      _allancestors.insert(*it);
+      _ilist.push_back(*it);
+    }
+
+  }
+
+  // debug print
+  //
+  //std::set<int>::iterator it, itE;
+  //itE = _allancestors.end();
+  //std::cout << "All Ancestors of " << c << ": [ ";
+  //for(it = _allancestors.begin(); it != itE; it++) {
+  //  std::cout << *it << " " ;
+  //}
+
+  //std::cout << "]\n";
+  
+  return _allancestors;
+}
+
+std::set<int> getImmediateDescendantList (Node *ncurr, int _pid, std::vector<int> &_list)
+{
+  std::set<int> _descendant;
+  
+  std::vector<int>::iterator _it, _itend;
+  _itend = _list.end();
+  
+  //std::cout << "In ImmediateDesc\n"<<"pid:" <<_pid <<std::endl ;
+  
+  for(_it = _list.begin(); _it != _itend; _it++) {
+    Transition *_t = ncurr->GetTransition(_pid, *_it);
+    std::vector<CB> _tdesc = _t->get_intra_cb();
+    for(std::vector<CB>::iterator it = _tdesc.begin();
+	it != _tdesc.end(); it++){
+      _descendant.insert((*it)._index);	  
+    }    
+  }  
+  return _descendant;
+}
+
+std::set<int> getAllDescendantList (Node *ncurr, CB c)
+{
+  std::set<int> _alldescendants, _idescendants;
+  std::vector<int> _ilist;
+  _ilist.push_back(c._index);
+  unsigned int size;
+
+  while(1) {
+    std::set<int>::iterator it, it_end;
+    
+    _idescendants = getImmediateDescendantList(ncurr, c._pid, _ilist);
+    
+    if(_idescendants.empty())
+      break;
+    
+    it_end = _idescendants.end();
+    _ilist.clear();
+    
+    for(it = _idescendants.begin(); it != it_end; it++) {
+      _alldescendants.insert(*it);
+      _ilist.push_back(*it);
+    }
+  }
+
+  // debug print
+  //
+  //std::set<int>::iterator it, itE;
+  //itE = _alldescendants.end();
+  //std::cout << "All Descendants of " << c << ": [ ";
+  //for(it = _alldescendants.begin(); it != itE; it++) {
+  //  std::cout << *it << " " ;
+  //}
+
+  //std::cout << "]\n";
+   
+  return _alldescendants;
+}
+
