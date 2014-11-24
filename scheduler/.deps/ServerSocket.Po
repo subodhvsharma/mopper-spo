@@ -14,6 +14,7 @@ ServerSocket.o: ServerSocket.cpp ServerSocket.hpp \
  /usr/include/x86_64-linux-gnu/bits/select.h \
  /usr/include/x86_64-linux-gnu/bits/sigset.h \
  /usr/include/x86_64-linux-gnu/bits/time.h \
+ /usr/include/x86_64-linux-gnu/bits/select2.h \
  /usr/include/x86_64-linux-gnu/sys/sysmacros.h \
  /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h Socket.hpp \
  /usr/include/c++/4.6/iostream \
@@ -26,6 +27,7 @@ ServerSocket.o: ServerSocket.cpp ServerSocket.hpp \
  /usr/include/wchar.h /usr/include/stdio.h \
  /usr/lib/gcc/x86_64-linux-gnu/4.6/include/stdarg.h \
  /usr/include/x86_64-linux-gnu/bits/wchar.h /usr/include/xlocale.h \
+ /usr/include/x86_64-linux-gnu/bits/wchar2.h \
  /usr/include/c++/4.6/exception /usr/include/c++/4.6/bits/char_traits.h \
  /usr/include/c++/4.6/bits/stl_algobase.h \
  /usr/include/c++/4.6/bits/functexcept.h \
@@ -53,6 +55,7 @@ ServerSocket.o: ServerSocket.cpp ServerSocket.hpp \
  /usr/include/x86_64-linux-gnu/bits/posix_opt.h \
  /usr/include/x86_64-linux-gnu/bits/environments.h \
  /usr/include/x86_64-linux-gnu/bits/confname.h /usr/include/getopt.h \
+ /usr/include/x86_64-linux-gnu/bits/unistd.h \
  /usr/include/c++/4.6/x86_64-linux-gnu/./bits/atomic_word.h \
  /usr/include/c++/4.6/bits/locale_classes.h /usr/include/c++/4.6/string \
  /usr/include/c++/4.6/bits/allocator.h \
@@ -90,14 +93,16 @@ ServerSocket.o: ServerSocket.cpp ServerSocket.hpp \
  /usr/include/asm-generic/socket.h \
  /usr/include/x86_64-linux-gnu/asm/sockios.h \
  /usr/include/asm-generic/sockios.h \
+ /usr/include/x86_64-linux-gnu/bits/socket2.h \
  /usr/include/x86_64-linux-gnu/sys/un.h /usr/include/string.h \
+ /usr/include/x86_64-linux-gnu/bits/string3.h \
  /usr/include/c++/4.6/cassert /usr/include/assert.h \
  /usr/include/c++/4.6/map /usr/include/c++/4.6/bits/stl_tree.h \
  /usr/include/c++/4.6/bits/stl_map.h \
  /usr/include/c++/4.6/bits/stl_multimap.h /usr/include/stdlib.h \
  /usr/include/x86_64-linux-gnu/bits/waitflags.h \
  /usr/include/x86_64-linux-gnu/bits/waitstatus.h /usr/include/alloca.h \
- /usr/include/netinet/in.h \
+ /usr/include/x86_64-linux-gnu/bits/stdlib.h /usr/include/netinet/in.h \
  /usr/lib/gcc/x86_64-linux-gnu/4.6/include/stdint.h /usr/include/stdint.h \
  /usr/include/x86_64-linux-gnu/bits/in.h /usr/include/arpa/inet.h \
  /usr/include/x86_64-linux-gnu/sys/wait.h /usr/include/signal.h \
@@ -149,6 +154,8 @@ ServerSocket.hpp:
 
 /usr/include/x86_64-linux-gnu/bits/time.h:
 
+/usr/include/x86_64-linux-gnu/bits/select2.h:
+
 /usr/include/x86_64-linux-gnu/sys/sysmacros.h:
 
 /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h:
@@ -184,6 +191,8 @@ Socket.hpp:
 /usr/include/x86_64-linux-gnu/bits/wchar.h:
 
 /usr/include/xlocale.h:
+
+/usr/include/x86_64-linux-gnu/bits/wchar2.h:
 
 /usr/include/c++/4.6/exception:
 
@@ -256,6 +265,8 @@ Socket.hpp:
 /usr/include/x86_64-linux-gnu/bits/confname.h:
 
 /usr/include/getopt.h:
+
+/usr/include/x86_64-linux-gnu/bits/unistd.h:
 
 /usr/include/c++/4.6/x86_64-linux-gnu/./bits/atomic_word.h:
 
@@ -347,9 +358,13 @@ Socket.hpp:
 
 /usr/include/asm-generic/sockios.h:
 
+/usr/include/x86_64-linux-gnu/bits/socket2.h:
+
 /usr/include/x86_64-linux-gnu/sys/un.h:
 
 /usr/include/string.h:
+
+/usr/include/x86_64-linux-gnu/bits/string3.h:
 
 /usr/include/c++/4.6/cassert:
 
@@ -370,6 +385,8 @@ Socket.hpp:
 /usr/include/x86_64-linux-gnu/bits/waitstatus.h:
 
 /usr/include/alloca.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdlib.h:
 
 /usr/include/netinet/in.h:
 

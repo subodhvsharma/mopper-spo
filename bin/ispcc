@@ -11,4 +11,4 @@
 # See LICENSE for licensing information
 #
 
-exec "/usr/bin/mpicc" "-L/home/ssharma/svs-research/isp-versions/isp-predictive-binary/lib" "-I/home/ssharma/svs-research/isp-versions/isp-predictive-binary/include/isp" -Wl,-rpath=/home/ssharma/svs-research/isp-versions/isp-predictive-binary/lib -include isp.h $* -lisp_prof
+exec "/usr/bin/mpicc" "-L/home/ssharma/svs-research/isp-versions/mopper-spo/lib" "-I/home/ssharma/svs-research/isp-versions/mopper-spo/include/isp" -Wl,-rpath=/home/ssharma/svs-research/isp-versions/mopper-spo/lib -include isp.h $* -lisp_prof

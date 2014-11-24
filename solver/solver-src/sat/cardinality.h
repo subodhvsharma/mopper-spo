@@ -8,8 +8,7 @@
 #define CPROVER_PROP_CARDINALITY_H
 
 
-#include "prop.h"
-#include "literal.h"
+#include <solver-src/prop/prop.h>
 #include <vector>
 #include <list>
 #include<algorithm>

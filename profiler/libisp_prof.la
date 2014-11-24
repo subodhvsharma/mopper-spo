@@ -38,4 +38,4 @@ dlopen=''
 dlpreopen=''
 
 # Directory that this library needs to be installed in:
-libdir='/home/ssharma/svs-research/isp-versions/isp-predictive-binary/lib'
+libdir='/home/ssharma/svs-research/isp-versions/mopper-spo/lib'

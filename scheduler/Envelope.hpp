@@ -67,6 +67,13 @@ public:
     bool in_exall;
 /* == fprs end == */
 
+/*  modifications of the multireceive FM encoding   */   
+  int cardinality;
+  int corresponding_top_id;
+  int corresponding_top_index;
+  bool istop; 
+  bool isbottom;
+
     void ref_inc();
     void ref_dec();
     bool isshared();

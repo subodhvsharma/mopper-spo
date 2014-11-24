@@ -11,7 +11,7 @@ bin_PROGRAMS = isp.exe
 isp_exe_SOURCES = Socket.cpp ServerSocket.cpp MpiProc.cpp Envelope.cpp \
                   name2id.cpp  Scheduler.cpp  Counter.cpp Transition.cpp TransitionList.cpp \
                   InterleavingTree.cpp utility.cpp Mo.cpp Wu.cpp Encoding.cpp FMEncoding.cpp \
-	          SPOEncoding.cpp sched-opt.c main.cpp
+	          SPOEncoding.cpp OptEncoding.cpp MultiReceive.cpp sched-opt.c main.cpp
 
 
 

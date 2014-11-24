@@ -14,7 +14,7 @@ void print_literals(bvt& literals)
   unsigned int size=literals.size();
   for(unsigned int i=0;i<size;i++)
   {
-    std::cout<< " " << literals[i] ;
+    //    std::cout<< " " << literals[i] ;
   }
   std::cout << std::endl;
 }

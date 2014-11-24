@@ -252,6 +252,11 @@ Envelope::Envelope() {
     src = 0;
     src_wildcard = false;
     ref = 1;
+    cardinality = -1; 
+    isbottom = false;
+    istop = false;
+    corresponding_top_id = -1;
+    corresponding_top_index = -1;
 }
 
 Envelope::Envelope(const Envelope &e) {

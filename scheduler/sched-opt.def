@@ -46,8 +46,8 @@ flag = {
     value     		= E;
     arg-type  		= number;
     arg-default 	= 0;
-    arg-range		= "0->1";
-    descrip   		= "SAT encoding type: 0 for FM, 1 for PLDI";
+    arg-range		= "0->2";
+    descrip   		= "SAT encoding type: 0 for FM, 1 for SPO, 2 for MultiReceives";
 };
 
 flag = {

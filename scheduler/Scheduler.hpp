@@ -42,6 +42,7 @@ class M;
 class W;
 class FMEncoding;
 class SPOEncoding;
+class OptEncoding;
 class propt;
 
 #include <list>
@@ -121,6 +122,7 @@ public:
   propt *slv;
   FMEncoding *fm;
   SPOEncoding *spo;
+  OptEncoding *opt;
   /*end of modification --[svs] */
   
   std::string getProgName(){ return this->ProgName();}

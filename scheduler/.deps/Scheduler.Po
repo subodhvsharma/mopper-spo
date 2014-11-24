@@ -34,6 +34,7 @@ Scheduler.o: Scheduler.cpp Scheduler.hpp /usr/include/c++/4.6/list \
  /usr/include/x86_64-linux-gnu/bits/select.h \
  /usr/include/x86_64-linux-gnu/bits/sigset.h \
  /usr/include/x86_64-linux-gnu/bits/time.h \
+ /usr/include/x86_64-linux-gnu/bits/select2.h \
  /usr/include/x86_64-linux-gnu/sys/sysmacros.h \
  /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h Socket.hpp \
  /usr/include/c++/4.6/iostream /usr/include/c++/4.6/ostream \
@@ -43,6 +44,7 @@ Scheduler.o: Scheduler.cpp Scheduler.hpp /usr/include/c++/4.6/list \
  /usr/include/wchar.h /usr/include/stdio.h \
  /usr/lib/gcc/x86_64-linux-gnu/4.6/include/stdarg.h \
  /usr/include/x86_64-linux-gnu/bits/wchar.h /usr/include/xlocale.h \
+ /usr/include/x86_64-linux-gnu/bits/wchar2.h \
  /usr/include/c++/4.6/bits/char_traits.h \
  /usr/include/c++/4.6/bits/localefwd.h \
  /usr/include/c++/4.6/x86_64-linux-gnu/./bits/c++locale.h \
@@ -59,6 +61,7 @@ Scheduler.o: Scheduler.cpp Scheduler.hpp /usr/include/c++/4.6/list \
  /usr/include/x86_64-linux-gnu/bits/posix_opt.h \
  /usr/include/x86_64-linux-gnu/bits/environments.h \
  /usr/include/x86_64-linux-gnu/bits/confname.h /usr/include/getopt.h \
+ /usr/include/x86_64-linux-gnu/bits/unistd.h \
  /usr/include/c++/4.6/x86_64-linux-gnu/./bits/atomic_word.h \
  /usr/include/c++/4.6/bits/locale_classes.h /usr/include/c++/4.6/string \
  /usr/include/c++/4.6/bits/ostream_insert.h \
@@ -91,14 +94,16 @@ Scheduler.o: Scheduler.cpp Scheduler.hpp /usr/include/c++/4.6/list \
  /usr/include/asm-generic/socket.h \
  /usr/include/x86_64-linux-gnu/asm/sockios.h \
  /usr/include/asm-generic/sockios.h \
+ /usr/include/x86_64-linux-gnu/bits/socket2.h \
  /usr/include/x86_64-linux-gnu/sys/un.h /usr/include/string.h \
+ /usr/include/x86_64-linux-gnu/bits/string3.h \
  /usr/include/c++/4.6/cassert /usr/include/assert.h \
  /usr/include/c++/4.6/map /usr/include/c++/4.6/bits/stl_tree.h \
  /usr/include/c++/4.6/bits/stl_map.h \
  /usr/include/c++/4.6/bits/stl_multimap.h /usr/include/stdlib.h \
  /usr/include/x86_64-linux-gnu/bits/waitflags.h \
  /usr/include/x86_64-linux-gnu/bits/waitstatus.h /usr/include/alloca.h \
- /usr/include/netinet/in.h \
+ /usr/include/x86_64-linux-gnu/bits/stdlib.h /usr/include/netinet/in.h \
  /usr/lib/gcc/x86_64-linux-gnu/4.6/include/stdint.h /usr/include/stdint.h \
  /usr/include/x86_64-linux-gnu/bits/in.h /usr/include/arpa/inet.h \
  MpiProc.hpp Envelope.hpp name2id.hpp /usr/include/c++/4.6/vector \
@@ -111,6 +116,8 @@ Scheduler.o: Scheduler.cpp Scheduler.hpp /usr/include/c++/4.6/list \
  /usr/include/c++/4.6/cstdio /usr/include/libio.h \
  /usr/include/_G_config.h /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
  /usr/include/x86_64-linux-gnu/bits/sys_errlist.h \
+ /usr/include/x86_64-linux-gnu/bits/stdio.h \
+ /usr/include/x86_64-linux-gnu/bits/stdio2.h \
  /usr/include/c++/4.6/x86_64-linux-gnu/./bits/basic_file.h \
  /usr/include/c++/4.6/x86_64-linux-gnu/./bits/c++io.h \
  /usr/include/c++/4.6/bits/fstream.tcc sched-opt.h \
@@ -145,7 +152,8 @@ Scheduler.o: Scheduler.cpp Scheduler.hpp /usr/include/c++/4.6/list \
  ../solver/solver-src/sat/dimacs_cnf.h \
  ../solver/solver-src/sat/cnf_clause_list.h /usr/include/c++/4.6/memory \
  /usr/include/c++/4.6/bits/stl_raw_storage_iter.h \
- /usr/include/c++/4.6/backward/auto_ptr.h SPOEncoding.hpp
+ /usr/include/c++/4.6/backward/auto_ptr.h SPOEncoding.hpp OptEncoding.hpp \
+ MultiReceive.hpp
 
 Scheduler.hpp:
 
@@ -239,6 +247,8 @@ ServerSocket.hpp:
 
 /usr/include/x86_64-linux-gnu/bits/time.h:
 
+/usr/include/x86_64-linux-gnu/bits/select2.h:
+
 /usr/include/x86_64-linux-gnu/sys/sysmacros.h:
 
 /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h:
@@ -268,6 +278,8 @@ Socket.hpp:
 /usr/include/x86_64-linux-gnu/bits/wchar.h:
 
 /usr/include/xlocale.h:
+
+/usr/include/x86_64-linux-gnu/bits/wchar2.h:
 
 /usr/include/c++/4.6/bits/char_traits.h:
 
@@ -312,6 +324,8 @@ Socket.hpp:
 /usr/include/x86_64-linux-gnu/bits/confname.h:
 
 /usr/include/getopt.h:
+
+/usr/include/x86_64-linux-gnu/bits/unistd.h:
 
 /usr/include/c++/4.6/x86_64-linux-gnu/./bits/atomic_word.h:
 
@@ -391,9 +405,13 @@ Socket.hpp:
 
 /usr/include/asm-generic/sockios.h:
 
+/usr/include/x86_64-linux-gnu/bits/socket2.h:
+
 /usr/include/x86_64-linux-gnu/sys/un.h:
 
 /usr/include/string.h:
+
+/usr/include/x86_64-linux-gnu/bits/string3.h:
 
 /usr/include/c++/4.6/cassert:
 
@@ -414,6 +432,8 @@ Socket.hpp:
 /usr/include/x86_64-linux-gnu/bits/waitstatus.h:
 
 /usr/include/alloca.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdlib.h:
 
 /usr/include/netinet/in.h:
 
@@ -458,6 +478,10 @@ Transition.hpp:
 /usr/include/x86_64-linux-gnu/bits/stdio_lim.h:
 
 /usr/include/x86_64-linux-gnu/bits/sys_errlist.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdio.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdio2.h:
 
 /usr/include/c++/4.6/x86_64-linux-gnu/./bits/basic_file.h:
 
@@ -568,3 +592,7 @@ InterleavingTree.hpp:
 /usr/include/c++/4.6/backward/auto_ptr.h:
 
 SPOEncoding.hpp:
+
+OptEncoding.hpp:
+
+MultiReceive.hpp:

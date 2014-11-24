@@ -38,6 +38,8 @@ void FMEncoding::isLitCreatedForCollEvent(CB A, literalt & m_e)
   return;
 }
 
+
+
 void FMEncoding::createEventLiterals ()
 {
   

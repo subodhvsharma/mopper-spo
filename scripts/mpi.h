@@ -20,4 +20,4 @@
  */
 
 #include "/usr/include/mpich2/mpi.h"
-#include "/home/ssharma/svs-research/isp-versions/isp-predictive-binary/include/isp/isp.h"
+#include "/home/ssharma/svs-research/isp-versions/mopper-spo/include/isp/isp.h"

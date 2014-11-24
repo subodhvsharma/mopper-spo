@@ -53,6 +53,7 @@
 //#include "Encoding.hpp"
 #include "FMEncoding.hpp"
 #include "SPOEncoding.hpp"
+#include "OptEncoding.hpp"
 #include "utility.hpp"
 #include "stdlib.h"
 /* svs -- SAT solving end */
@@ -650,12 +651,6 @@ void Scheduler::StartMC () {
     /* 
        Generate the sat formula for the trace and associated interleavings
     */ 
-    // e0 = new Encoding0(it, m);
-    // e0->Encoding_Matches();
-     // e1 = new Encoding1(it, m); 
-     // e1->Encoding_Events();
-    // e2 = new Encoding2(it, m); 
-    // e2->Encoding_Mixed();
     
     // if(it->checkIfSATAnalysisRequired()){
     //   e3 = new Encoding3(it, m); 
@@ -666,37 +661,6 @@ void Scheduler::StartMC () {
     //   // }
     // }
 
-    //[svs] assumes you have an env. var defined for 
-    // encoding type called ENCODINGTYPE to the following
-    // two values: 
-    // 1) for FM encoding ENCODINGTYPE=fmEnc
-    // 2) for PLDI encodin ENCODINGTYPE=pldiEnc
-   
-    //    ----
-    // char const * encType = getenv("ENCODINGTYPE");
-    // if (encType ==NULL){
-    //   std::cout << "Environment variable ENCODINGTYPE is not set .. exiting" <<std::endl;
-    //   exit(0);
-    // }
-    // else{
-    //   std::string eType(encType);
-    //   if (eType.compare("fmEnc") == 0){
-    // 	std::cout << "Executing the FM encoding" <<std::endl;
-    // 	e3 = new FMEncoding(it, m); 
-    // 	e3->encodingPartialOrders();
-    //   }
-    //   else if (eType.compare("pldiEnc") == 0){
-    // 	std::cout << "Executing the SPO encoding" <<std::endl;
-    // 	spo = new SPOEncoding(it, m);
-    // 	spo->poEnc();
-    //   }
-    //   else {
-    // 	std::cout << "ENCODINGTYPE is not set to either fmEnc or pldiEnc"
-    // 		  <<std::endl;
-    // 	exit(0);
-    //   }
-    // }
-    
     if(Scheduler::_solver.compare("minisat") == 0)
       slv = static_cast<propt*> (new satcheck_simplifiert);
     else if (Scheduler::_solver.compare("lingeling") == 0)
@@ -717,6 +681,12 @@ void Scheduler::StartMC () {
       spo = new SPOEncoding(it, m, slv);
       spo->poEnc();
     }
+    else if (Scheduler::_encoding == 2){
+      std::cout << "Executing the MultiReceives encoding" <<std::endl;
+      opt = new OptEncoding(it, m, slv);
+      opt->encodingPartialOrders();
+    }
+
     else {
       std::cout << "ENCODINGTYPE is not set to either fmEnc or pldiEnc"
 		<<std::endl;

@@ -79,8 +79,8 @@ SRC =  $(MINISAT2_SRC)  \
       ../util/i2string.cpp \
       ../util/threeval.cpp \
       ../util/mp_arith.cpp \
-      flattening/bv_utils.cpp 
-#   sat/cardinality.cpp \
+      flattening/bv_utils.cpp \
+      sat/cardinality.cpp 
 
 
 INCLUDES= -I .. \
