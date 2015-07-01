@@ -952,6 +952,10 @@ void Scheduler::generateFirstInterleaving () {
 	   the first interleaving. T has a "NEW" envelope
 	   which is never freed When this leak is fixed,
 	   please remove this comment */
+	//Envelope * env; 
+	//env = t->GetEnvelope();
+	//CB ct(env->id, env->index);
+	//std::cout<< "\n" << it->GetCurrNode ()->getAllAncestors(ct).size() << std::endl;
 	if (! t->GetEnvelope ()->isBlockingType ()) {
 	  Send (i, goback);
 	} else {

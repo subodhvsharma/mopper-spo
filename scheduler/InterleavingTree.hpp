@@ -88,7 +88,9 @@ public:
   std::set<int> getAllAncestors(CB c); //svs addition
   bool isAncestor(CB c1, CB c2); // svs addition
   bool Present(int a, std::vector<int> l); // svs addition
-  
+  std::set<int> getImmediateDescendants (CB c);
+  std::set<int> getAllDescendants (CB  c);
+    
     Transition *GetTransition (CB &c);
     Transition *GetTransition (int, int);
 
@@ -127,7 +129,7 @@ public:
      * begin CoE modification
      */
 
-    CountTracker _countracker;
+  CountTracker _countracker;
 #ifdef CONFIG_BOUNDED_MIXING
     bool expand;
 #endif

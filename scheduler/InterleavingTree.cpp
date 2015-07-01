@@ -23,6 +23,7 @@
 #include <map>
 #include <queue>
 #include <string.h>
+#include <stack>
 #ifndef WIN32
 #include <pthread.h>
 #endif
@@ -33,7 +34,7 @@
 #include "Encoding.hpp"
 #include "FMEncoding.hpp"
 #include "SPOEncoding.hpp"
-
+#include "assert.h"
 #include "util/threeval.h"
 
 
@@ -950,120 +951,140 @@ bool Node::Present(int a, std::vector<int> l)
   return false;
 }
 
+std::set<int> Node::getImmediateDescendants (CB c)
+{
+  std::set<int> _descendant;
+  
+  Transition *_t = GetTransition(c);
+  std::vector<CB> _tdesc = _t->get_intra_cb();
+  for(std::vector<CB>::iterator it = _tdesc.begin();
+      it != _tdesc.end(); it++){
+    _descendant.insert((*it)._index);	  
+  }    
+  return _descendant;
+}
+
+std::set<int> Node:: getAllDescendants (CB c)
+{
+  std::set<int> _alldescendants;
+  std::stack<int> st;
+  st.push(c._index);
+  unsigned int size;
+
+  while(!st.empty()) {
+    
+    int index = st.top();
+    st.pop();
+    
+    CB tmp(c._pid, index);
+    
+    std::set<int> _idesc;
+    _idesc = getImmediateDescendants(tmp);
+    
+    //if(_idescendants.empty())
+    //  break;
+    std::set<int>::iterator it_end, it;
+    it_end = _idesc.end();
+    
+    for(it = _idesc.begin(); it != it_end; it++) {
+      _alldescendants.insert(*it);
+      st.push(*it);
+    }
+  }
+
+  // debug print
+  //
+  //std::set<int>::iterator it, itE;
+  //itE = _alldescendants.end();
+  //std::cout << "All Descendants of " << c << ": [ ";
+  //for(it = _alldescendants.begin(); it != itE; it++) {
+  //  std::cout << *it << " " ;
+  //}
+
+  //std::cout << "]\n";
+   
+  return _alldescendants;
+}
 
 
 std::set<int> Node::getAllAncestors(CB c)
 {
   std::set<int> res;
-  
-  // std::cout << " ===========" <<std::endl;
-  // std::cout << "getAllAncestors of " << c << std::endl;
-  
-  
-  //  std::vector<int>::iterator ait, ait_end;
-  
-  //  std::vector<int> tmp;
-  
-  // _restart:
-  //  ait_end = ancs.end();
-  //  for(ait = ancs.begin(); ait != ait_end; ait++)
-  //    {
-  //      std::cout << "ancestor: " << CB(c._pid, *ait) <<std::endl;
-      
-  //      //if(find(res.begin(), res.end(), *it) == res.end()){
-  //      if (!Present(*it, res)){
-  // 	std::cout << "adding to ancestor: " << *ait << std::endl;
-  // 	res.push_back(*ait);
-  //      }
-
-  //      Transition *t1 = GetTransition(c._pid, *it);
-      
-  //      std::vector<int>::iterator it1, it1e;
-  //      // std::vector<int> l;
-      
-  //      it1 = t1->get_ancestors().begin();
-      
-  //      it1e = t1->get_ancestors().end();
-      
-  //      for(; it1 != it1e; it1++)
-  // 	tmp.push_back(*it1);
-  //    }
-  
-  //  if(!tmp.empty()){
-  //    ancs.clear();
-  //    ancs = tmp;
-  //    tmp.clear();
-  //    goto _restart;
-  //  }
-  
-  
-    
-    
-    
-  CB c1(c._pid, -1);
-
-  //std::vector<int>  &ancs(t->get_ancestors());
-  TransitionList *tl = _tlist[c._pid];
-    
-  std::vector<Transition>::reverse_iterator tlit, tlitend;
-    
-  tlitend = tl->_tlist.rend();
-    
-  int j = tl->_tlist.size()-1; 
-    
-  for(tlit = tl->_tlist.rbegin(); tlit != tlitend; tlit++){
-      
-    c1._index = j;
-      
-    j--;
-      
-    if(c1 > c){
-	
-      //std::cout << "c1 = "<< c1 << " is later issued than " << c << std::endl;
-	
-      continue;
-      
-    }
-      
-    else{
-	
-      Transition * t = GetTransition(c1);
-	
-      std::vector<int>::iterator iter = t->get_ancestors().begin();
-	
-      std::vector<int>::iterator iter_end = t->get_ancestors().end();
-	
-      for (; iter != iter_end; iter++) {
-	  
-	int i = *iter;
-	  
-	// std::cout << "inserting ancestor " << i << std::endl;
-	  
-	res.insert(i);
-	  
-      }
-      
-    }
-    
-  }
-    
-  //debug print 
-  // std::set<int>::iterator sit, sitend;
-  // sitend = res.end();
-  // std::cout << "All ancestor set of" << c << ":[ " <<std::endl;
-  // for(sit = res.begin(); sit != sitend; sit++)
-  //   std::cout << *sit << " ";
-  // std::cout <<  " ]"<< std::endl;
+ 
+ // CB c1(c._pid, -1);
+ 
+ // //std::vector<int>  &ancs(t->get_ancestors());
+ // TransitionList *tl = _tlist[c._pid];
+ 
+ // std::vector<Transition>::reverse_iterator tlit, tlitend;
+ 
+ // tlitend = tl->_tlist.rend();
+ 
+ // int j = tl->_tlist.size()-1; 
+ 
+ // for(tlit = tl->_tlist.rbegin(); tlit != tlitend; tlit++){
+   
+ //   c1._index = j;
+   
+ //   j--;
+   
+ //   if(c1 > c){
+     
+ //     //std::cout << "c1 = "<< c1 << " is later issued than " << c << std::endl;
+     
+ //     continue;
+     
+ //   }
+   
+ //   else{
+     
 
 
-  return res;
-  
+ std::list <CB> stack; 
+ stack.push_back(c);
+   
+ while (!stack.empty()) { 
+   CB tmp = stack.back();
+   assert(tmp._pid != -1) ;
+   stack.pop_back();
+
+   Transition * t = GetTransition(tmp);
+   std::vector<int>::iterator iter = t->get_ancestors().begin();
+ 
+   std::vector<int>::iterator iter_end = t->get_ancestors().end();
+   
+   
+   for (; iter != iter_end; iter++) {
+     
+     int i = *iter;
+     
+     // std::cout << "inserting ancestor " << i << std::endl;
+     
+     res.insert(i);
+     CB c1(c._pid, i);
+     stack.push_back(c1);
+   }
+ }
+ //  }   
+ // }
+ 
+ //debug print 
+ // std::set<int>::iterator sit, sitend;
+ // sitend = res.end();
+ // std::cout << "All ancestor set of" << c << ":[ " <<std::endl;
+ // for(sit = res.begin(); sit != sitend; sit++)
+ //   std::cout << *sit << " ";
+ // std::cout <<  " ]"<< std::endl;
+ 
+ return res;
+ 
 }
 
 // checks if c2 is an ancestor of c1. 
 bool Node::isAncestor(CB c1, CB c2)
 {
-  std::set<int> res; 
+  std::set<int> res;
+  
   if(c1._pid == c2._pid){
     
     res = getAllAncestors(c1);
@@ -1288,14 +1309,15 @@ int ITree::CHECK (ServerSocket &sock, std::list <int> &l) {
       int _psrc = cbl.front()._pid;
       int _pdst = cbl.back()._pid;
 	  
-      if(_esrc->isSendType()) {
-	if(_edst->func_id == IRECV || _edst->func_id == RECV) {
-	  if(_edst->src_wildcard)
-	    n->_countracker.updateCount(_psrc, _pdst, true);            
-	  else 
-	    n->_countracker.updateCount(_psrc, _pdst, false);
-	}
-      }
+      // if(_esrc->isSendType()) {
+      // 	if(_edst->func_id == IRECV || _edst->func_id == RECV) {
+      // 	  if(_edst->src_wildcard)
+      // 	    n->_countracker.updateCount(_psrc, _pdst, true);            
+      // 	  else 
+      // 	    n->_countracker.updateCount(_psrc, _pdst, false);
+      // 	}
+      // }
+   
       // else if (_esrc->func_id == BARRIER)
       //   n->curr_match_set = cbl;
       //else

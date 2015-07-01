@@ -407,42 +407,152 @@ void M::UpdateDesc(Node* ncurr, Node* nlast, int _psrc, int _pdst, std::set<int>
   }
 }
 
-
-void M::ConstructAncs(Node* ncurr, Node* nlast) 
+void M::getAllDescSends(Node *n, Node *nlast, std::set<int> &snd_set)
 {
+  Envelope *senv; 
+  senv = n->GetTransition(n->curr_match_set.front())->GetEnvelope();
+  snd_set = nlast->getAllDescendants(n->curr_match_set.front());
+  // delete from the ancestors set if not send type				
+  for(std::set<int>::iterator sit = snd_set.begin(); 
+      sit != snd_set.end();){
+    CB cb_for_sit(n->curr_match_set.front()._pid, *sit);
+    Envelope *env_for_sit;
+    env_for_sit = nlast->GetTransition(cb_for_sit)->GetEnvelope();
+    
+    if (!env_for_sit->isSendType() || (env_for_sit->dest != senv->dest)){
+      std::set<int>::iterator del_iter;
+      del_iter = sit;
+      ++sit;
+      snd_set.erase(del_iter);
+      continue;
+    }
+    else
+      ++sit;
+  } // end for
+
+}
+
+
+void M:: getAllAncsSends(Node *n, std::set<int> & snd_set)
+{
+  Envelope *senv; 
+  senv = n->GetTransition(n->curr_match_set.front())->GetEnvelope();
+  snd_set = n->getAllAncestors(n->curr_match_set.front());
+  // delete from the ancestors set if not send type				
+  for(std::set<int>::iterator sit = snd_set.begin(); 
+      sit != snd_set.end();){
+    CB cb_for_sit(n->curr_match_set.front()._pid, *sit);
+    Envelope *env_for_sit;
+    env_for_sit = n->GetTransition(cb_for_sit)->GetEnvelope();
+    
+    if (!env_for_sit->isSendType() || (env_for_sit->dest != senv->dest)){
+      std::set<int>::iterator del_iter;
+      del_iter = sit;
+      ++sit;
+      snd_set.erase(del_iter);
+      continue;
+    }
+    else
+      ++sit;
+  } // end for
+}
+
+void M::getAllDescRecvs(Node *n, Node *nlast, std::set<int> & recv_set)
+{
+  int sndr_id; 
+  sndr_id = n->GetTransition(n->curr_match_set.front())->GetEnvelope()->id;
   
+  recv_set = nlast->getAllDescendants(n->curr_match_set.back());
+
+  // delete from descendantss 
+  for(std::set<int>::iterator sit =recv_set.begin(); 
+      sit != recv_set.end(); ){
+    
+    CB cb_for_sit(n->curr_match_set.back()._pid, *sit);
+    Envelope *env_for_sit;
+    env_for_sit = nlast->GetTransition(cb_for_sit)->GetEnvelope();
+    
+    if (!env_for_sit->isRecvTypeOnly() || 
+	(env_for_sit->src != sndr_id && 
+	 env_for_sit->src != WILDCARD)){
+      std::set<int>::iterator del_iter;
+      del_iter = sit;
+      ++sit;
+      recv_set.erase(del_iter);
+      continue;
+    }
+    else
+      ++sit;
+  } // end for
+}
+
+void M::getAllAncsRecvs(Node *n, std::set<int> & recv_set)
+{
+  int sndr_id; 
+  sndr_id = n->GetTransition(n->curr_match_set.front())->GetEnvelope()->id;
+  
+  recv_set = n->getAllAncestors(n->curr_match_set.back());
+  // delete from ancestors 
+  for(std::set<int>::iterator sit =recv_set.begin(); 
+      sit != recv_set.end(); ){
+    
+    CB cb_for_sit(n->curr_match_set.back()._pid, *sit);
+    Envelope *env_for_sit;
+    env_for_sit = n->GetTransition(cb_for_sit)->GetEnvelope();
+    
+    if (!env_for_sit->isRecvTypeOnly() || 
+	(env_for_sit->src != sndr_id && 
+	 env_for_sit->src != WILDCARD)){
+      std::set<int>::iterator del_iter;
+      del_iter = sit;
+      ++sit;
+      recv_set.erase(del_iter);
+      continue;
+    }
+    else
+      ++sit;
+  } // end for
+}
+
+void M::NewConstructAncs(Node *ncurr, Node* nlast)
+{
+
   if(ncurr->curr_match_set.back()._pid >= ncurr->NumProcs() || 
      ncurr->curr_match_set.back()._pid < 0)
-    return;
+    assert(false);
   
-     Envelope *env;
-     if (!ncurr->curr_match_set.empty()){
+  Envelope *renv;
+  Envelope *senv;
+  if (!ncurr->curr_match_set.empty()){
+    renv = ncurr->GetTransition(ncurr->curr_match_set.back())->GetEnvelope();
+    senv = ncurr->GetTransition(ncurr->curr_match_set.front())->GetEnvelope();
+    
+    int _psrc = ncurr->curr_match_set.front()._pid; // sending process pid
+    
+    int _pdst = ncurr->curr_match_set.back()._pid;  // recv process pid
 
-       env = ncurr->GetTransition(ncurr->curr_match_set.back())->GetEnvelope();
-
-       if(env->isRecvTypeOnly()){
-
-	 /* Add the match-set Scurr-Rcurr to the Mo set */
-	 bool flag = Update(std::pair<CB, CB> (ncurr->curr_match_set.front(),
-	 				       ncurr->curr_match_set.back() ));
-	 
-	 
-	 //std::cout << *env <<std::endl;
-	
-	 int _psrc = ncurr->curr_match_set.front()._pid; // sending process pid
-       
-	 int _pdst = ncurr->curr_match_set.back()._pid;  // recv process pid
-
-	 // Debug print
-	 // std::cout << "diff for CB pair: [" 
-	 // 	   << ncurr->curr_match_set.front() << ","
-	 // 	   << ncurr->curr_match_set.back() << " ]";	  
-	 
-	 
-
-       
-       /* get differential count between <Scurr, Rcurr> */
-	 int _diff = ncurr->_countracker.getDiffCount(_psrc, _pdst);
+    if(renv->isRecvTypeOnly()){
+      
+      /* Add the match-set Scurr-Rcurr to the Mo set */
+      bool flag = Update(std::pair<CB, CB> (ncurr->curr_match_set.front(),
+					    ncurr->curr_match_set.back() ));
+      
+      /* 
+	 1) Get the ancestor sends of curr_match_set.front() which have
+	    the same destination
+	 2) Get all ancestor receives of curr_match_set.back() that syntactically 
+	    match the curr_match_set.front()
+	 NOTE: possible optimization here -- memoization
+      */
+      std::set<int> _all_ancestors_of_send;
+      std::set<int> _all_ancs_recv_that_match_send;
+      
+      getAllAncsSends(ncurr, _all_ancestors_of_send);
+      getAllAncsRecvs(ncurr, _all_ancs_recv_that_match_send);
+      
+      /* get differential count between <Scurr, Rcurr> */
+      int _diff = _all_ancs_recv_that_match_send.size() - 
+	_all_ancestors_of_send.size();
     
 	 // debug print
 	 //std::cout << " is = " << _diff << std::endl;
@@ -483,11 +593,136 @@ void M::ConstructAncs(Node* ncurr, Node* nlast)
 	 }
 	 
        }
-       // assert(_diff == 0);
-       }
-     }
+      
+    }
+  }
 }
 
+void M::ConstructAncs(Node* ncurr, Node* nlast) 
+{
+  
+  if(ncurr->curr_match_set.back()._pid >= ncurr->NumProcs() || 
+     ncurr->curr_match_set.back()._pid < 0)
+    return;
+  
+  Envelope *env;
+  if (!ncurr->curr_match_set.empty()){
+    
+    env = ncurr->GetTransition(ncurr->curr_match_set.back())->GetEnvelope();
+    
+    if(env->isRecvTypeOnly()){
+      
+      /* Add the match-set Scurr-Rcurr to the Mo set */
+      bool flag = Update(std::pair<CB, CB> (ncurr->curr_match_set.front(),
+					    ncurr->curr_match_set.back() ));
+      
+      
+      //std::cout << *env <<std::endl;
+      
+      int _psrc = ncurr->curr_match_set.front()._pid; // sending process pid
+      
+      int _pdst = ncurr->curr_match_set.back()._pid;  // recv process pid
+      
+      // Debug print
+      // std::cout << "diff for CB pair: [" 
+      // 	   << ncurr->curr_match_set.front() << ","
+      // 	   << ncurr->curr_match_set.back() << " ]";	  
+      
+      /* get differential count between <Scurr, Rcurr> */
+      int _diff = ncurr->_countracker.getDiffCount(_psrc, _pdst);
+      
+      // debug print
+      //std::cout << " is = " << _diff << std::endl;
+      
+      std::set<int> _aset;
+      std::vector<int> _alist;
+      
+      _alist.push_back(ncurr->curr_match_set.back()._index);
+	 
+      // debug print
+      //
+      //_aset = getAllAncestorList(ncurr, ncurr->curr_match_set.back());
+      //std::cout << ncurr->curr_match_set.back() << std::endl;
+      
+      while(_diff > 0) {
+	
+	_aset = getImmediateAncestorList(ncurr, _pdst, _alist);
+  	
+	if(_aset.empty()) {
+	  // debug print
+	  //
+	  //std::cout << "breaking out from empty set\n";
+	  break;
+  	 }
+	
+	UpdateAncs(ncurr, _psrc, _pdst, _aset, _diff);
+	
+	//std::cout << "diff after CeR : " << _diff << std::endl;
+	// assert(_diff == 0);
+	 
+	_alist.clear();
+	
+	for(std::set<int>::iterator it = _aset.begin(); 
+	    it != _aset.end(); it++){
+	   
+	  _alist.push_back(*it);
+	  
+	}
+	
+      }
+      // assert(_diff == 0);
+    }
+  }
+}
+
+void M::NewConstructDesc(Node* ncurr, Node* nlast) 
+{
+  if(ncurr->curr_match_set.back()._pid >= ncurr->NumProcs()  )
+    return;
+  
+  if (!ncurr->curr_match_set.empty()){
+    Envelope* renv = ncurr->GetTransition(ncurr->curr_match_set.back())->GetEnvelope();
+    
+    if(renv->isRecvTypeOnly()){
+      
+      int _psrc = ncurr->curr_match_set.front()._pid; // sending process pid
+      int _pdst = ncurr->curr_match_set.back()._pid;  // recv process pid
+      
+      std::set<int> _all_descendants_of_send;
+      std::set<int> _all_descendant_recv_that_match_send;
+      
+      //[svs]: its cruicial to operate with nlast since
+      // for any other node the _intra_cb info is not complete
+      getAllDescSends(ncurr, nlast, _all_descendants_of_send);
+      getAllDescRecvs(ncurr, nlast, _all_descendant_recv_that_match_send);
+      
+      /* get differential count between <Scurr, Rcurr> */
+      int _ldiff = _all_descendant_recv_that_match_send.size() -
+	_all_descendants_of_send.size();
+      
+      std::set<int> _dset;
+      std::vector<int> _dlist;
+      
+      _dlist.push_back(ncurr->curr_match_set.back()._index);
+      
+      while(_ldiff > 0) {
+	_dset = getImmediateDescendantList(nlast, _pdst, _dlist);
+	
+	if(_dset.empty()) {
+	  break;
+	}
+	
+	UpdateDesc(ncurr, nlast, _psrc, _pdst, _dset, _ldiff);
+	
+	_dlist.clear();
+	
+	for(std::set<int>::iterator it = _dset.begin(); it != _dset.end(); it++){
+	  _dlist.push_back(*it);                
+	}
+      }
+    }
+  }
+}
 
 void M::ConstructDesc(Node* ncurr, Node* nlast) {
   
@@ -565,9 +800,9 @@ void M::_MConstruct(ITree *itree) {
     //   ncurr->_countracker.debugPrint();
     
     //    std::cout<< "Going in Ancs construction ..." <<std::endl;
-    ConstructAncs(ncurr, nlast);
+    NewConstructAncs(ncurr, nlast);
     // std::cout<< "success in Ancs construction" <<std::endl;
-    ConstructDesc(ncurr, nlast);
+    NewConstructDesc(ncurr, nlast);
   }
 }
 

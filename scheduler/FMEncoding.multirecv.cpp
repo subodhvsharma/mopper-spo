@@ -1,5 +1,7 @@
 #include "FMEncoding.hpp"
 #include <fstream> 
+#include "stdlib.h" 
+#include "solver-src/sat/cardinality.h"
 
 ////////////////////////////////////////////////////////////
 /////                                                ///////
@@ -38,8 +40,6 @@ void FMEncoding::isLitCreatedForCollEvent(CB A, literalt & m_e)
   return;
 }
 
-
-
 void FMEncoding::createEventLiterals ()
 {
   
@@ -49,6 +49,7 @@ void FMEncoding::createEventLiterals ()
       Envelope *env = (*titer).GetEnvelope();
       CB A (env->id, env->index); 
       if(env->func_id == FINALIZE) continue;
+      if(env->isRecvType() && !env->isbottom) continue;
       if(env->isCollectiveType()){
 	isLitCreatedForCollEvent(A, m_e);
       }
@@ -108,6 +109,7 @@ void FMEncoding::createMatchLiterals()
 {
   std::stringstream uniquepair;
   std::string matchNumeral;
+  std::stringstream matchNumeralReadable;
   
   forall_matchSet(mit, matchSet){
     forall_match(lit, (**mit)){
@@ -115,7 +117,9 @@ void FMEncoding::createMatchLiterals()
       if(last_node->GetTransition(*lit)->GetEnvelope()->isSendType() ||
 	 last_node->GetTransition(*lit)->GetEnvelope()->isRecvType()){
 	uniquepair<<(*lit)._pid;
+        matchNumeralReadable << (*lit)._pid << ".";
 	uniquepair<<(*lit)._index;
+        matchNumeralReadable << (*lit)._index << "_";
       }
     }
     matchNumeral = uniquepair.str();
@@ -126,12 +130,14 @@ void FMEncoding::createMatchLiterals()
 	  
     //insert in to the map
       matchMap.insert(std::pair<std::string, literalt> (matchNumeral, s_m));
-      revMatchMap.insert(std::pair<literalt, std::string> (s_m, matchNumeral));
+      revMatchMap.insert(std::pair<literalt, std::string> (s_m, matchNumeralReadable.str()));
       match2symMap.insert(std::pair<MatchPtr, std::string> (*mit, matchNumeral));
       
       // clear out uniquepair
       uniquepair.str("");
       uniquepair.clear();
+      matchNumeralReadable.str("");
+      matchNumeralReadable.clear();
     }
   }
 }
@@ -245,24 +251,24 @@ std::string FMEncoding::getClkLitName(literalt lt, CB A, CB B)
   
   if (!envA->isCollectiveType() && !envB->isCollectiveType()){
     std::pair <CB, CB> p = revClkMap.find(lt)->second;
-    ss << "C_" << p.first._pid << p.first._index << "_" 
-       << p.second._pid << p.second._index;
+    ss << "C_" << p.first._pid << "." << p.first._index << "_" 
+       << p.second._pid << "." << p.second._index;
     return ss.str();
   }
   else if(envA->isCollectiveType() && !envB->isCollectiveType()){
     std::pair<MatchPtr, CB>  p = revClkMapCollEvent.find(lt)->second;
     ss << "C_";
     forall_match(lit, (*(p.first))){
-      ss <<  (*lit)._pid << (*lit)._index;
+      ss <<  (*lit)._pid << "." << (*lit)._index;
     }
     ss<< "_" << p.second._pid << p.second._index;
     return ss.str();
   }
   else if(!envA->isCollectiveType() && envB->isCollectiveType()){
    std::pair<CB, MatchPtr>  p = revClkMapEventColl.find(lt)->second;
-    ss << "C_" << p.first._pid << p.first._index << "_";
+    ss << "C_" << p.first._pid << "." << p.first._index << "_";
     forall_match(lit, (*(p.second))){
-      ss << (*lit)._pid << (*lit)._index;
+      ss << (*lit)._pid << "." << (*lit)._index;
     }
     return ss.str();
   }
@@ -270,11 +276,11 @@ std::string FMEncoding::getClkLitName(literalt lt, CB A, CB B)
     std::pair<MatchPtr, MatchPtr> p = revClkMapCollColl.find(lt)->second;
     ss << "C_";
     forall_match(lit, (*(p.first))){
-      ss << (*lit)._pid << (*lit)._index;
+      ss << (*lit)._pid << "." << (*lit)._index;
     }
     ss << "_";
     forall_match(lit, (*(p.second))){
-      ss << (*lit)._pid << (*lit)._index;
+      ss << (*lit)._pid << "." << (*lit)._index;
     }
     return ss.str();
   }
@@ -292,7 +298,7 @@ std::string FMEncoding::getLitName(literalt lt, int type)
     
   case 1:{
     CB A = revEventMap.find(lt)->second;
-    ss << "M_" << A._pid << A._index;
+    ss << "M_" << A._pid << "." << A._index;
     return ss.str();  
   }
     
@@ -300,21 +306,21 @@ std::string FMEncoding::getLitName(literalt lt, int type)
     MatchPtr Aptr = revCollMap.find(lt)->second;
     ss << "M_";
     forall_match(lit, (*Aptr)){
-      ss << (*lit)._pid  << (*lit)._index;
+      ss << (*lit)._pid << "." << (*lit)._index;
     }
     return ss.str();
     
   }
   case 3: {
     CB A = revEventMap.find(lt)->second;
-    ss << "I_" << A._pid  << A._index;
+    ss << "I_" << A._pid << "." << A._index;
     return ss.str();
   }
   case 4: {
     MatchPtr Aptr = revCollMap.find(lt)->second;
     ss << "I_";
     forall_match(lit, (*Aptr)){
-      ss << (*lit)._pid <<(*lit)._index;
+      ss << (*lit)._pid << "." << (*lit)._index;
     }
     return ss.str();
   }
@@ -426,6 +432,47 @@ void FMEncoding::insertClockEntriesInMap(CB B, CB A,  literalt c_ba)
   }
 }
 
+//THIS IS A SPECIALISED CODE WORKING ONLY IN FLOYD CASE
+void FMEncoding::setUpMultiReceives()
+{
+  //for all events
+  forall_transitionLists(iter, last_node->_tlist){
+    forall_transitions(titer, (*iter)->_tlist){
+      Envelope * envA = (*titer).GetEnvelope();
+      if(envA->isRecvType()) continue;
+      //if event is not receive, traverse the chain of receive ancestors.
+      int count = 0;
+      if ((*titer).get_ancestors().size() == 0)
+	continue;
+      std::vector<int>::iterator vit = (*titer).get_ancestors().begin();
+      CB B(envA->id, *vit);
+      Envelope * envB = last_node->GetTransition(B)->GetEnvelope();
+      Envelope * bottom = envB;
+      Envelope * top = envB;
+      while (envB->isRecvType())
+      {
+	count++;
+        top = envB;
+	vit = last_node->GetTransition(B)->get_ancestors().begin();
+        if (last_node->GetTransition(B)->get_ancestors().size() == 0)
+   	  break;
+        B._pid = envB->id;
+        B._index = *vit;
+        envB = last_node->GetTransition(B)->GetEnvelope();
+      }
+      if (count>0)
+      {
+        bottom->cardinality = count;
+	bottom->corresponding_top_id = top->id;
+	bottom->corresponding_top_index = top->index;
+	bottom->isbottom = true;
+	top->istop = true;
+      }
+    }
+  }
+
+}
+
 
 void FMEncoding::createClkLiterals()
 {
@@ -435,24 +482,48 @@ void FMEncoding::createClkLiterals()
     forall_transitions(titer, (*iter)->_tlist){
       Envelope * envA = (*titer).GetEnvelope();
       if(envA->func_id == FINALIZE) continue;
+
       CB A(envA->id, envA->index);
-      for(std::vector<int>::iterator vit = (*titer).get_ancestors().begin();
-	  vit != (*titer).get_ancestors().end(); vit ++){
-	CB B (envA->id, *vit);
-	Envelope * envB = last_node->GetTransition(B)->GetEnvelope();
-	if(envB->func_id == FINALIZE) continue;
-	bvt Abv, Bbv;
-	
+      if(!envA->isRecvType() || envA->istop) {
+        for(std::vector<int>::iterator vit = (*titer).get_ancestors().begin();
+  	  vit != (*titer).get_ancestors().end(); vit ++){
+  	CB B (envA->id, *vit);
+  	Envelope * envB = last_node->GetTransition(B)->GetEnvelope();
+  	if(envB->func_id == FINALIZE) continue;
+  	bvt Abv, Bbv;
+  	
+  	Abv = getEventBV(A);
+  	Bbv = getEventBV(B);
+  	
+  	literalt c_ba = bvUtils->unsigned_less_than(Bbv, Abv);
+  
+  	insertClockEntriesInMap(B, A, c_ba);
+  
+  	slv->l_set_to(c_ba, true); // PPO constraint
+  
+  	formula << getClkLitName(c_ba,B, A) << " & " <<std::endl;
+        }
+      }
+    }
+  }
+
+  forall_transitionLists(iter, last_node->_tlist){
+    forall_transitions(titer, (*iter)->_tlist){
+      Envelope * envA = (*titer).GetEnvelope();
+      if(envA->func_id == FINALIZE) continue;
+      if(envA->isbottom && envA->index!=envA->corresponding_top_index)
+      {
+        CB A(envA->id, envA->index);
+        CB B(envA->corresponding_top_id, envA->corresponding_top_index);
+
+  	bvt Abv, Bbv;
 	Abv = getEventBV(A);
 	Bbv = getEventBV(B);
-	
 	literalt c_ba = bvUtils->unsigned_less_than(Bbv, Abv);
 
-	insertClockEntriesInMap(B, A, c_ba);
-
-	slv->l_set_to(c_ba, true); // PPO constraint
-
-	formula << getClkLitName(c_ba,B, A) << " & " <<std::endl;
+  	insertClockEntriesInMap(B, A, c_ba);
+	slv->l_set_to(c_ba, true);
+  	formula << getClkLitName(c_ba,B, A) << " & " <<std::endl;
       }
     }
   }
@@ -475,19 +546,27 @@ void FMEncoding::createRFConstraint()
       assert((**mit).size() == 2);
       CB A = (**mit).front();
       CB B = (**mit).back();
+
+      Envelope * envR = last_node->GetTransition(B)->GetEnvelope();
+      if (!envR->isbottom) continue;
+
+      CB B_top(envR->corresponding_top_id, envR->corresponding_top_index);
+      CB B_bot(envR->id, envR->index);
       
-      bvt Abv, Bbv;
+      bvt Abv, Bbv_bot, Bbv_top;
       
       Abv = getEventBV(A);
-      Bbv = getEventBV(B);
+      Bbv_bot = getEventBV(B_bot);
+      Bbv_top = getEventBV(B_top);
       
-      //literalt c_ab = getClkLiteral(A, B); 
-      literalt e_ab = bvUtils->equal(Abv, Bbv);  // [svs]: clk_a = clk_b
+      literalt e_abtop = bvUtils->lt_or_le(true,Bbv_top,Abv,bvUtils->UNSIGNED);//  unsigned_less_than(Bbv_top, Abv);  // [svs]: clk_a = clk_b
+      literalt e_abbot = bvUtils->lt_or_le(true,Abv,Bbv_bot,bvUtils->UNSIGNED);// unsigned_less_than(Abv, Bbv_bot);  // [svs]: clk_a = clk_b
       literalt s_ab = getMatchLiteral(*mit);
 
-      slv->l_set_to(slv->limplies(s_ab, e_ab), true);
+      slv->l_set_to(slv->limplies(s_ab, e_abtop), true);
+      slv->l_set_to(slv->limplies(s_ab, e_abbot), true);
       formula << "(" << getLitName(s_ab, 0) << " -> " 
-	      << "e_ab" <<  ") & " <<std::endl;
+	      << A._pid << A._index << "between (" << B_top._pid << B_top._index << "," << B_bot._pid << B_bot._index << ") & " <<std::endl;
 	//getClkLitName(c_ab, A, B) << ") & " <<std::endl;
     }
   }
@@ -506,7 +585,7 @@ void FMEncoding::createRFSomeConstraint()
       if(envA->func_id == FINALIZE) continue;
       CB A(envA->id, envA->index);
       m_a = getMILiteral(A).first;
-      if(envA->isRecvType() || envA->isSendType()) {
+      if((envA->isRecvType() && envA->isbottom) || envA->isSendType()) {
 	forall_matchSet(mit, matchSet){
 	  forall_match(lit, (**mit)){
 	    if((*lit) == A) {
@@ -516,17 +595,41 @@ void FMEncoding::createRFSomeConstraint()
 	  }
 	  if(flag){
 	    s_m = getMatchLiteral(*mit);
-	    rhs.push_back(s_m);
+            CB B = (*mit)->back();
+            Envelope * envB = last_node->GetTransition(B)->GetEnvelope();
+            if (!envA->isSendType() || envB->isbottom)
+	      rhs.push_back(s_m);
 	    flag = false;
 	  }
 	}
 	if(!rhs.empty()){
-	  slv->l_set_to(slv->limplies(m_a, slv->lor(rhs)) , true);
-	  formula << "(" << getLitName(m_a,1) << " -> (";
-	  for(bvt::iterator bit = rhs.begin(); bit != rhs.end(); bit++){
-	    formula << getLitName(*bit,0) << " | ";  
-	  }
-	  formula << ")) &" << std::endl;
+          int cardinality = envA->cardinality;
+
+	  formulat fo_atmost;
+          commander_encodingt se(*slv);
+          se.atmostk(rhs, cardinality, fo_atmost);
+          //literalt card_lit_atmost = se.get_lit_for_formula(fo_atmost);
+
+	  formulat fo_exactly;
+          se.exactlyk(rhs, cardinality, fo_exactly);
+          literalt card_lit_exactly = se.get_lit_for_formula(fo_exactly);
+           
+	  slv->l_set_to(slv->limplies(m_a, card_lit_exactly) , true);
+	  slv->l_set_to(slv->limplies(card_lit_exactly, m_a) , true);
+      
+	  //formula << getLitName(m_a,0) << "<->exactly" << cardinality << " & ";  
+	  formula << getLitName(m_a,1) << "<->exactly" << cardinality << "(";
+
+          for(bvt::iterator bit = rhs.begin(); bit != rhs.end(); bit++){
+            formula << getLitName(*bit,0) << " , ";
+          }
+
+          formula << ") & ";  
+
+          se.add_to_prop(fo_atmost);
+	  formula << "atmost" << cardinality << " & ";  
+          
+	  formula << std::endl;
 	  rhs.clear();
 	}
 	else {
@@ -657,6 +760,7 @@ void FMEncoding::alternateAllAncestorsMatched()
     forall_transitions(titer, (*iter)->_tlist){
       Envelope *envA = titer->GetEnvelope();
       if(envA->func_id == FINALIZE) continue;
+      if(envA->isRecvType() && !envA->isbottom) continue;
       CB A (envA->id, envA->index);
       std::pair<literalt, literalt> p = getMILiteral(A);
       literalt m_a = p.first;
@@ -665,7 +769,12 @@ void FMEncoding::alternateAllAncestorsMatched()
       // 	formula << "(" << getLitName(m_a,4) << " <-> (";
       //      else
       formula  << "(" << getLitName(m_a,3) << " <-> (" ;
-      
+      if (envA->isbottom) {
+	formula << "viatop ";
+	A._pid = envA->corresponding_top_id;
+	A._index = envA->corresponding_top_index;
+	envA = last_node->GetTransition(A)->GetEnvelope();
+      }
       std::vector<int> ancs = last_node->GetTransition(A)->get_ancestors();
       for(std::vector<int>::iterator vit = ancs.begin(); 
 	  vit != ancs.end(); vit++){
@@ -697,10 +806,27 @@ void FMEncoding::matchImpliesIssued()
 {
 
   formula << "****matchImpliesIssued***" << std::endl;
+  forall_matchSet(mit, matchSet){
+    literalt s_ab = getMatchLiteral(*mit);
+
+    CB A = (**mit).front();
+    CB B = (**mit).back();
+    Envelope * envA = last_node->GetTransition(A)->GetEnvelope();
+    if(envA->isCollectiveType() || envA->func_id == FINALIZE)
+      continue;
+    literalt i_a = getMILiteral(A).second;
+    literalt i_b = getMILiteral(B).second;
+    slv->l_set_to(slv->limplies(s_ab, i_a), true);
+    slv->l_set_to(slv->limplies(s_ab, i_b), true);
+    formula << getLitName(s_ab, 0) << " -> " << getLitName(i_a, 3) << " &" << std::endl;
+    formula << getLitName(s_ab, 0) << " -> " << getLitName(i_b, 3) << " &" << std::endl;
+  }
+/*
   forall_transitionLists(iter, last_node->_tlist){
     forall_transitions(titer, (*iter)->_tlist){
       Envelope *envA = (*titer).GetEnvelope();
       if(envA->func_id == FINALIZE) continue;
+      if(envA->isRecvType() && !envA->isbottom) continue;
       if(!envA->isCollectiveType()){
 	CB A(envA->id, envA->index);
 	literalt m_a = getMILiteral(A).first;
@@ -711,6 +837,7 @@ void FMEncoding::matchImpliesIssued()
       }
     }
   }
+*/
   forall_matchSet(mit, matchSet){
     CB A = (**mit).front();
     Envelope *front = 
@@ -748,6 +875,7 @@ void FMEncoding::notAllMatched()
     forall_transitions(titer, (*iter)->_tlist){
       Envelope *envA = titer->GetEnvelope();
       if(envA->func_id == FINALIZE) continue;
+      if(envA->isRecvType() && !envA->isbottom) continue;
       CB A(envA->id, envA->index);
       literalt m_a = getMILiteral(A).first;
       c.push_back(slv->lnot(m_a));
@@ -813,6 +941,7 @@ void FMEncoding::publish()
     forall_transitions(titer, (*iter)->_tlist){
       Envelope *envA = (*titer).GetEnvelope();
       if(envA->func_id == FINALIZE) continue;
+      if(envA->isRecvType() && !envA->isbottom) continue;
       CB A(envA->id, envA->index);
       literalt m_a = getMILiteral(A).first;
       literalt i_a = getMILiteral(A).second;
@@ -904,35 +1033,38 @@ void FMEncoding::publish()
 
 void FMEncoding::generateConstraints()
 {
- createMatchSet();
+  setUpMultiReceives();
+  createMatchSet();
   //  printMatchSet();
   //std::cout << formula.str();
- createEventLiterals();
- set_width();
- createBVEventLiterals();
- createMatchLiterals();
- 
- gettimeofday(&constGenStart, NULL);
+  createEventLiterals();
+  set_width();
+  createBVEventLiterals();
+  createMatchLiterals();
   
- createClkLiterals(); // partial order constraint + clock difference
- uniqueMatchSend(); // unique match for send constraint
- uniqueMatchRecv(); // unique match for recv constraint
- createRFSomeConstraint(); // Match correct
- createMatchConstraint(); //Matched Only
- noMoreMatchesPossible(); // No more matches possible
- alternateAllAncestorsMatched(); // All ancestors matched  
- notAllMatched();  // not all matched
- matchImpliesIssued(); // match only  issued
- createRFConstraint(); // clock equality
- waitMatch();
- 
- gettimeofday(&constGenEnd, NULL);
- getTimeElapsed(constGenStart, constGenEnd);
+  gettimeofday(&constGenStart, NULL);
+  
+  createClkLiterals(); // partial order constraint + clock difference
+// VOJTA: three below are removed, I think it's not needed if we have 2 implications for Match correct)
+//  uniqueMatchSend(); // unique match for send constraint
+//  uniqueMatchRecv(); // unique match for recv constraint
+  createRFSomeConstraint(); // Match correct
+//  createMatchConstraint(); //Matched Only
+  noMoreMatchesPossible(); // No more matches possible
+  alternateAllAncestorsMatched(); // All ancestors matched  
+  notAllMatched();  // not all matched
+  matchImpliesIssued(); // match only  issued
+  createRFConstraint(); // clock equality
+  waitMatch();
+  
+  gettimeofday(&constGenEnd, NULL);
+  getTimeElapsed(constGenStart, constGenEnd);
  
 }
 
 void FMEncoding::encodingPartialOrders()
 {
+  std::cout << "**XXX**" << std::endl;
   generateConstraints();
     
   if(Scheduler::_formula==true){

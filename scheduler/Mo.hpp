@@ -141,7 +141,20 @@ public:
   void wrToFile(std::ofstream &filename);
  
   std::list<CB> & getCBLst(_MIterator iter);
+
+
+  void getAllAncsSends(Node *n, std::set<int> & snd_set);
   
+  void getAllAncsRecvs(Node *n, std::set<int> & recv_set);
+  
+  void NewConstructAncs(Node *ncurr, Node* nlast);
+  
+  void NewConstructDesc(Node* ncurr, Node* nlast) ;
+
+  void getAllDescSends(Node *ncurr, Node *nlast, std::set<int> &snd_set);
+
+  void getAllDescRecvs(Node *ncurr, Node *nlast,  std::set<int> & recv_set);
+
   _M _MSet;
 };
 
