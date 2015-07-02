@@ -4,6 +4,10 @@ a) With FM encoding : ./isp -E 0 ...
 b) With SPO encoding: ./isp -E 1 ... 
 c) With MultiReceive encoding:  ./isp -E 2 ... 
 
+TO specify the solver add
+
+a) --minisat
+b) --lingeling to the options
 
 =========
 
