@@ -1,0 +1,14 @@
+MOPPER can be run with SPO or FM encoding in the following way
+
+a) With FM encoding : ./isp -E 0 ... 
+b) With SPO encoding: ./isp -E 1 ... 
+c) With MultiReceive encoding:  ./isp -E 2 ... 
+
+
+=========
+
+In order to add command line options 
+
+a) modify sched-opt.def
+b) modify scheduler.cpp/hpp main.cpp
+c) install the tool again. 
