@@ -11,4 +11,4 @@
 # See LICENSE for licensing information
 #
 
-/usr/lib/jvm/java-1.6.0-openjdk-amd64/jre/bin/java -jar "/home/ssharma/svs-research/isp-versions/mopper-spo/bin/ispui.jar" $* 
+ -jar "/home/svs/svs-research/isp-versions/mopper-spo/bin/ispui.jar" $* 

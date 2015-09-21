@@ -15,4 +15,4 @@ export PATH="/usr/bin":$PATH
 if [ ! -x "/usr/bin/mpiexec" ]; then
     export USE_MPIRUN="true"
 fi
-exec "/home/ssharma/svs-research/isp-versions/mopper-spo/bin/isp.exe" $*
+exec "/home/svs/svs-research/isp-versions/mopper-spo/bin/isp.exe" $*

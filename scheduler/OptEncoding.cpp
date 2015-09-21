@@ -50,7 +50,13 @@ void OptEncoding::createEventLiterals ()
       Envelope *env = (*titer).GetEnvelope();
       CB A (env->id, env->index); 
       if(env->func_id == FINALIZE) continue;
+
+      // [svs]: Seems problematic to me; what happens to 
+      //        deterministic receives which are not part of 
+      //        multirecevs??
+      // POSSIBLE SOLN: put additional check for wildcard recv
       if(env->isRecvType() && !env->isbottom) continue;
+
       if(env->isCollectiveType()){
 	isLitCreatedForCollEvent(A, m_e);
       }
@@ -217,6 +223,7 @@ MatchPtr OptEncoding::getMPtr(CB A)
 std::string OptEncoding::getClkLitName(literalt lt, CB A, CB B)
 {
   Envelope *envA, *envB;
+
   envA = last_node->GetTransition(A)->GetEnvelope();
   envB = last_node->GetTransition(B)->GetEnvelope();
   
@@ -848,7 +855,6 @@ void OptEncoding::matchImpliesIssued()
 
   formula << "****matchImpliesIssued***" << std::endl;
   forall_matchSet(mit, matchSet){
-    literalt s_ab = getMatchLiteral(*mit);
 
     CB A = (**mit).front();
     CB B = (**mit).back();
@@ -863,7 +869,8 @@ void OptEncoding::matchImpliesIssued()
     bool is_B_multirecv = blk_wildcard_recv? multiRs.isPresent(B):false;
     
     if(is_B_multirecv && !envB->isbottom) continue;
-      
+    
+    literalt s_ab = getMatchLiteral(*mit);
     literalt i_a = getMILiteral(A).second;
     literalt i_b = getMILiteral(B).second;
     slv->l_set_to(slv->limplies(s_ab, i_a), true);

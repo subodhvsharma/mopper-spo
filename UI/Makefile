@@ -82,14 +82,14 @@ DIST_SOURCES =
 CLASSPATH_ENV = CLASSPATH=$(JAVAROOT):$(srcdir)/$(JAVAROOT)$${CLASSPATH:+":$$CLASSPATH"}
 am__java_sources = $(src_JAVA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ACLOCAL = ${SHELL} /home/ssharma/svs-research/isp-versions/mopper-spo/missing --run aclocal-1.11
+ACLOCAL = ${SHELL} /home/svs/svs-research/isp-versions/mopper-spo/missing --run aclocal-1.11
 AMTAR = $${TAR-tar}
 AR = ar
-AUTOCONF = ${SHELL} /home/ssharma/svs-research/isp-versions/mopper-spo/missing --run autoconf
-AUTOHEADER = ${SHELL} /home/ssharma/svs-research/isp-versions/mopper-spo/missing --run autoheader
-AUTOMAKE = ${SHELL} /home/ssharma/svs-research/isp-versions/mopper-spo/missing --run automake-1.11
-AWK = gawk
-BINDIR = /home/ssharma/svs-research/isp-versions/mopper-spo/bin
+AUTOCONF = ${SHELL} /home/svs/svs-research/isp-versions/mopper-spo/missing --run autoconf
+AUTOHEADER = ${SHELL} /home/svs/svs-research/isp-versions/mopper-spo/missing --run autoheader
+AUTOMAKE = ${SHELL} /home/svs/svs-research/isp-versions/mopper-spo/missing --run automake-1.11
+AWK = mawk
+BINDIR = /home/svs/svs-research/isp-versions/mopper-spo/bin
 CC = gcc
 CCDEPMODE = depmode=gcc3
 CFLAGS = -g -O2 -DFIB -DCONFIG_OPTIONAL_AMPLE_SET_FIX
@@ -113,18 +113,18 @@ EXEEXT =
 FGREP = /bin/grep -F
 FUNCTION_NAME_VAR = __PRETTY_FUNCTION__
 GREP = /bin/grep
-INCDIR = /home/ssharma/svs-research/isp-versions/mopper-spo/include/isp
+INCDIR = /home/svs/svs-research/isp-versions/mopper-spo/include/isp
 INSTALL = /usr/bin/install -c
 INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
-JAR = /usr/lib/jvm/java-1.6.0-openjdk-amd64/bin/jar
-JAVA = /usr/lib/jvm/java-1.6.0-openjdk-amd64/jre/bin/java
-JAVAC = /usr/lib/jvm/java-1.6.0-openjdk-amd64/bin/javac
+JAR = 
+JAVA = 
+JAVAC = 
 LD = /usr/bin/ld -m elf_x86_64
 LDFLAGS = 
-LIBDIR = /home/ssharma/svs-research/isp-versions/mopper-spo/lib
+LIBDIR = /home/svs/svs-research/isp-versions/mopper-spo/lib
 LIBOBJS = 
 LIBOPTS_CFLAGS = -I$(top_srcdir)/libopts
 LIBOPTS_DIR = libopts
@@ -136,14 +136,14 @@ LIPO =
 LN_S = ln -s
 LTLIBOBJS = 
 MAINT = #
-MAKEINFO = ${SHELL} /home/ssharma/svs-research/isp-versions/mopper-spo/missing --run makeinfo
+MAKEINFO = ${SHELL} /home/svs/svs-research/isp-versions/mopper-spo/missing --run makeinfo
 MANIFEST_TOOL = :
 MKDIR_P = /bin/mkdir -p
 MPICC = /usr/bin/mpicc
 MPICXX = /usr/bin/mpicxx
 MPIDIR = /usr
 MPI_BINDIR = /usr/bin
-MPI_INCDIR = /usr/include/mpich2
+MPI_INCDIR = /usr/include/mpich
 NM = /usr/bin/nm -B
 NMEDIT = 
 OBJDUMP = objdump
@@ -164,10 +164,10 @@ SET_MAKE =
 SHELL = /bin/bash
 STRIP = strip
 VERSION = 0.2.0
-abs_builddir = /home/ssharma/svs-research/isp-versions/mopper-spo/UI
-abs_srcdir = /home/ssharma/svs-research/isp-versions/mopper-spo/UI
-abs_top_builddir = /home/ssharma/svs-research/isp-versions/mopper-spo
-abs_top_srcdir = /home/ssharma/svs-research/isp-versions/mopper-spo
+abs_builddir = /home/svs/svs-research/isp-versions/mopper-spo/UI
+abs_srcdir = /home/svs/svs-research/isp-versions/mopper-spo/UI
+abs_top_builddir = /home/svs/svs-research/isp-versions/mopper-spo
+abs_top_srcdir = /home/svs/svs-research/isp-versions/mopper-spo
 ac_ct_AR = ar
 ac_ct_CC = gcc
 ac_ct_CXX = g++
@@ -195,13 +195,13 @@ host_cpu = x86_64
 host_os = linux-gnu
 host_vendor = unknown
 htmldir = ${docdir}
-include_ispdir = /home/ssharma/svs-research/isp-versions/mopper-spo/include/isp
+include_ispdir = /home/svs/svs-research/isp-versions/mopper-spo/include/isp
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /home/ssharma/svs-research/isp-versions/mopper-spo/install-sh
-jar = /usr/lib/jvm/java-1.6.0-openjdk-amd64/bin/jar
-java = /usr/lib/jvm/java-1.6.0-openjdk-amd64/jre/bin/java
-javac = /usr/lib/jvm/java-1.6.0-openjdk-amd64/bin/javac
+install_sh = ${SHELL} /home/svs/svs-research/isp-versions/mopper-spo/install-sh
+jar = jar
+java = java
+javac = javac
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -213,7 +213,7 @@ mpicc = /usr/bin/mpicc
 mpicxx = /usr/bin/mpicxx
 oldincludedir = /usr/include
 pdfdir = ${docdir}
-prefix = /home/ssharma/svs-research/isp-versions/mopper-spo
+prefix = /home/svs/svs-research/isp-versions/mopper-spo
 program_transform_name = s,x,x,
 psdir = ${docdir}
 sbindir = ${exec_prefix}/sbin
@@ -503,10 +503,10 @@ uninstall-am: uninstall-binSCRIPTS uninstall-srcJAVA
 
 ispui.jar: classsrc.stamp
 	-rm -rf org com ispui.jar
-	/usr/lib/jvm/java-1.6.0-openjdk-amd64/bin/jar xf lib/log4j-1.2.15.jar org
-	/usr/lib/jvm/java-1.6.0-openjdk-amd64/bin/jar xf lib/syntax.jar com
-	/usr/lib/jvm/java-1.6.0-openjdk-amd64/bin/jar xf lib/jgraph.jar org
-	/usr/lib/jvm/java-1.6.0-openjdk-amd64/bin/jar cfm ispui.jar manifest.txt Data/*.class Graph/*.class UI/*.class Parser/*.class org com
+	 xf lib/log4j-1.2.15.jar org
+	 xf lib/syntax.jar com
+	 xf lib/jgraph.jar org
+	 cfm ispui.jar manifest.txt Data/*.class Graph/*.class UI/*.class Parser/*.class org com
 	-rm -rf org com
 
 install-srcJAVA:
