@@ -9,7 +9,7 @@ public:
   OptEncoding(ITree *it, M *m, propt *_slv): Encoding(it, m, _slv), width(0), eventSize(0) {} 
  
   void discoverMultiReceives();
-  void construct_multirecv_match(bvt &rhs, CB bottom); 
+  void construct_multirecv_match(bvt &rhs, Envelope *env); 
   //creation of literals m_a, i_a,
   // and bitvectors for maintaining clocks
   void createEventLiterals();
@@ -80,6 +80,10 @@ public:
   std::map<std::string, literalt> matchMap;
   std::map<literalt, std::string> revMatchMap;
   std::map<MatchPtr, std::string> match2symMap;
+
+  std::map<std::string, literalt> matchMap_MultiRecv;
+  std::map<literalt, std::string> revMatchMap_MultiRecv;
+  std::map<CB, std::set<literalt> > match2symMap_MultiRecv;
 
   std::map<literalt, std::pair<CB, CB> > revClkMap;
   std::map<std::pair<CB, CB>, literalt > clkMap; 

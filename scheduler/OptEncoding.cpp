@@ -40,7 +40,9 @@ void OptEncoding::isLitCreatedForCollEvent(CB A, literalt & m_e)
   return;
 }
 
-
+// for MultiRecvs, this function creates 
+// m_e and i_e variables only for the bottom 
+// event of the multireceives
 void OptEncoding::createEventLiterals ()
 {
   
@@ -51,16 +53,13 @@ void OptEncoding::createEventLiterals ()
       CB A (env->id, env->index); 
       if(env->func_id == FINALIZE) continue;
 
-      // [svs]: Seems problematic to me; what happens to 
-      //        deterministic receives which are not part of 
-      //        multirecevs??
-      // POSSIBLE SOLN: put additional check for wildcard recv
-      if(env->isRecvType() && !env->isbottom) continue;
-
+      if(env->isMultiRecv && !env->isbottom) continue;
+      
       if(env->isCollectiveType()){
 	isLitCreatedForCollEvent(A, m_e);
       }
-      else{
+      else{ // belonging to R_Bar U R where 
+	// the blocking wildcard is a bottom
 	m_e = slv->new_variable();
       }
       
@@ -94,35 +93,91 @@ void OptEncoding::printEventMap()
   }
 }
 
+/*
+  S_ab when b is not a multirecv OR
+  S_ac when b is a multirecv and (a,b) \in M^+, where c is bottom
+ */
 void OptEncoding::createMatchLiterals()
 {
   std::stringstream uniquepair;
   std::string matchNumeral;
-  
+  bool flag = false;
+
   forall_matchSet(mit, matchSet){
     forall_match(lit, (**mit)){
+      Envelope *env = last_node->GetTransition(*lit)->GetEnvelope();
       // match literals only for send and receive
-      if(last_node->GetTransition(*lit)->GetEnvelope()->isSendType() ||
-	 last_node->GetTransition(*lit)->GetEnvelope()->isRecvType()){
-	uniquepair<<(*lit)._pid;
-	uniquepair<<(*lit)._index;
+      if(env->isSendType() || env->isRecvType()){
+	// skip to the next match
+	if(env->isMultiRecv){
+	  flag = true;
+	  break;
+	}
+	uniquepair << (*lit)._pid;
+	uniquepair << (*lit)._index;
       }
     }
+    // if match has a recv that is a part of Multirecv
+    // then skip to the next match
+    if(flag){ 
+      flag = false;
+      uniquepair.str("");
+      uniquepair.clear();
+      continue;
+    }
+    // else continue with the match and create S_ab
     matchNumeral = uniquepair.str();
     if(matchNumeral.size()){
       literalt s_m = slv->new_variable();
       // //slv->constraintStream << matchNumeral << " s_m = " << s_m.get() 
       // 			       << std::endl;
-	  
-    //insert in to the map
       matchMap.insert(std::pair<std::string, literalt> (matchNumeral, s_m));
       revMatchMap.insert(std::pair<literalt, std::string> (s_m, matchNumeral));
       match2symMap.insert(std::pair<MatchPtr, std::string> (*mit, matchNumeral));
-      
       // clear out uniquepair
       uniquepair.str("");
       uniquepair.clear();
     }
+  }
+
+  // create S_ab when b is a MultiRecv
+  std::list<std::pair<CB, CB> >::iterator mrit; 
+  // for each multiRecv set
+  for (mrit = multiRs.receives.begin(); 
+       mrit != multiRs.receives.end(); mrit ++){
+    std::set <CB> multiRecvImg; 
+    // for each recv in the multiRecv
+    for (int i = (*mrit).first._index; 
+	 i <= (*mrit).second._index; i++){
+      CB t ((*mrit).first._pid, i);
+      // get the matchSet Image of recv
+      std::set<CB> tempImg = _m->MImage(t);
+      // insert it to the combined set 
+      multiRecvImg.insert(tempImg.begin(), tempImg.end());
+    }
+    
+    CB bottom = (*mrit).second;
+    std::set<literalt> temp;
+    for (std::set<CB>::iterator sit = multiRecvImg.begin();
+	 sit != multiRecvImg.end(); sit ++){
+
+      literalt s_m = slv->new_variable();
+      uniquepair<<(*sit)._pid;
+      uniquepair<<(*sit)._index;
+      uniquepair<<bottom._pid;
+      uniquepair<<bottom._index;
+
+      matchNumeral = uniquepair.str();
+
+      matchMap_MultiRecv.insert(std::pair<std::string, literalt> (matchNumeral, s_m));
+      revMatchMap_MultiRecv.insert(std::pair<literalt, std::string> (s_m, matchNumeral));
+      temp.insert(s_m);
+       
+      // clear out uniquepair
+      uniquepair.str("");
+      uniquepair.clear();
+    }
+    match2symMap_MultiRecv.insert(std::pair<CB, std::set<literalt> > (bottom, temp));
   }
 }
 
@@ -328,6 +383,10 @@ void OptEncoding::createBVEventLiterals()
       CB A (env->id, env->index); 
       bvt Abv; 
       Abv.resize(width);
+      /*
+	[svs]: Possible optimization - if multirecv then 
+	create BV only for bottom of multirecv
+       */
       for(unsigned i=0; i < width; i++){
 	Abv[i] = slv->new_variable();
       }
@@ -428,6 +487,7 @@ void OptEncoding:: discoverMultiReceives()
 			      (env->src == WILDCARD));
       if(!blk_wldcrd_recv)
 	continue;
+      //      else if (multiRs.isPresent(top)) continue;
       else if (multiRs.isPresent(top)) continue;
       else {
 	CB bottom (-1, -1);
@@ -436,11 +496,14 @@ void OptEncoding:: discoverMultiReceives()
 	     eiter++){
 	  Envelope *envN = (*eiter).GetEnvelope();
 	  CB n (envN->id, envN->index);
-	  if(!(envN->isRecvType() && envN->isBlockingType() && 
-	       (envN->src == WILDCARD)))
-	    break;
-	  else 
+	  if((envN->isRecvType() && envN->isBlockingType() && 
+	      (envN->src == WILDCARD))){
 	    bottom = n;
+	    envN->isMultiRecv = true;
+	    envN->corresponding_top_index = top._index;
+	  }
+	  else 
+	    break;
   	}
 	if(bottom._pid != -1) // check if bottom is not NULL
 	  multiRs.receives.push_back(std::pair<CB, CB>(top, bottom));
@@ -456,45 +519,53 @@ void OptEncoding:: discoverMultiReceives()
     Envelope * envBottom = last_node->GetTransition(bottom)->GetEnvelope();
     envTop->istop = true;
     envBottom->isbottom = true;
-    envBottom->corresponding_top_index = top._index;
+    // envBottom->corresponding_top_index = top._index;
+    envTop->corresponding_bottom_index = bottom._index;
     envBottom->corresponding_top_id = top._pid;
     envBottom->cardinality = bottom._index - top._index + 1;
   }
 }
 
-  
+// partial order constraint + clock difference  
+// 12, 21
 void OptEncoding::createClkLiterals()
 {
   formula << "****PPO****" << std::endl; 
   //slv->constraintStream << "****PPO****" << std::endl; 
   forall_transitionLists(iter, last_node->_tlist){
     forall_transitions(titer, (*iter)->_tlist){
-      Envelope * envA = (*titer).GetEnvelope();
-      if(envA->func_id == FINALIZE) continue;
-      CB A(envA->id, envA->index);
-      bool blk_wildcard_recv = ( envA->isRecvType() && 
-				 envA->isBlockingType() && 
-				 (envA->src == WILDCARD));
-      bool is_A_multirecv = blk_wildcard_recv? multiRs.isPresent(A):false;
       
-      if(!is_A_multirecv || envA->istop){
-	for(std::vector<int>::iterator vit = (*titer).get_ancestors().begin();
-	    vit != (*titer).get_ancestors().end(); vit ++){
-	  CB B (envA->id, *vit);
-	  Envelope * envB = last_node->GetTransition(B)->GetEnvelope();
-	  if(envB->func_id == FINALIZE) continue;
+      Envelope * envB = (*titer).GetEnvelope();
+      
+      if(envB->func_id == FINALIZE) continue;
+      
+      CB B(envB->id, envB->index);
+      
+
+      if(!envB->isMultiRecv || envB->istop) {
+	
+	std::vector<int> & ancsLst ((*titer).get_ancestors());
+	
+	for(std::vector<int>::iterator vit = ancsLst.begin();
+	    vit != ancsLst.end(); vit ++){
+	  
+	  CB A (envB->id, *vit);
+	  Envelope * envA = last_node->GetTransition(A)->GetEnvelope();
+	  
+	  if (envA->isMultiRecv) assert(envA->isbottom);
+	  
 	  bvt Abv, Bbv;
 	  
 	  Abv = getEventBV(A);
 	  Bbv = getEventBV(B);
 	  
-	  literalt c_ba = bvUtils->unsigned_less_than(Bbv, Abv);
+	  literalt c_ab = bvUtils->unsigned_less_than(Abv, Bbv);
 	  
-	  insertClockEntriesInMap(B, A, c_ba);
+	  insertClockEntriesInMap(A, B, c_ab);
 	  
-	  slv->l_set_to(c_ba, true); // PPO constraint
+	  slv->l_set_to(c_ab, true); // PPO constraint
 	  
-	  formula << getClkLitName(c_ba,B, A) << " & " <<std::endl;
+	  formula << getClkLitName(c_ab,A, B) << " & " <<std::endl;
 	}
       }
     }
@@ -502,21 +573,32 @@ void OptEncoding::createClkLiterals()
   
   forall_transitionLists(iter, last_node->_tlist){
     forall_transitions(titer, (*iter)->_tlist){
+      
       Envelope * envA = (*titer).GetEnvelope();
+      
       if(envA->func_id == FINALIZE) continue;
+      
       if(envA->isbottom) // && envA->index!=envA->corresponding_top_index)
       {
         CB A(envA->id, envA->index);
 	assert(envA->corresponding_top_id != -1); 
 	assert(envA->corresponding_top_index != -1); 
-        CB B(envA->corresponding_top_id, envA->corresponding_top_index);
+        CB B(envA->id, envA->corresponding_top_index);
 
   	bvt Abv, Bbv;
 	Abv = getEventBV(A);
 	Bbv = getEventBV(B);
-	literalt c_ba = bvUtils->unsigned_less_than(Bbv, Abv);
-
-  	insertClockEntriesInMap(B, A, c_ba);
+	
+	literalt c_ba;
+	// if (A != B) { 
+	//   c_ba = bvUtils->unsigned_less_than(Bbv, Abv);
+	// }
+	// else { //[svs]: for singleton blocking wildcards top = bottom
+	//   c_ba = bvUtils->equal(Bbv, Abv); 
+	// }
+	
+	c_ba = bvUtils->lt_or_le(true, Bbv, Abv, bv_utilst::UNSIGNED);
+	insertClockEntriesInMap(B, A, c_ba);
 	slv->l_set_to(c_ba, true);
   	formula << getClkLitName(c_ba,B, A) << " & " <<std::endl;
       }
@@ -524,7 +606,7 @@ void OptEncoding::createClkLiterals()
   }
 }
 
-
+// CONSTRAINT: 
 void OptEncoding::createRFConstraint()
 {
   bool flag = false;
@@ -550,7 +632,7 @@ void OptEncoding::createRFConstraint()
       Envelope * envR = last_node->GetTransition(B)->GetEnvelope();
       assert (envR->isRecvType());
 
-      if (envR->isbottom){
+      if (envR->isbottom){ // [svs]: What happens to MultiR recvs that are not bottom
 	
 	assert (envR->corresponding_top_index != -1); 
 	CB B_top(envR->corresponding_top_id, envR->corresponding_top_index);
@@ -583,30 +665,26 @@ void OptEncoding::createRFConstraint()
   }
 }
 
-void OptEncoding::construct_multirecv_match(bvt &rhs, CB bottom)
+//function: For a given CB, it identifies all the 
+//          images from M+ and obtain the relevant 
+//          match-pairs
+void OptEncoding::construct_multirecv_match(bvt & rhs, Envelope * env)
 {
-  Envelope *envA =  last_node->GetTransition(bottom)->GetEnvelope();
-  CB top(bottom._pid, envA->corresponding_top_index); 
-
-  assert(envA->corresponding_top_index != -1) ; 
-
-  bool flag = false;
-  rhs.clear();
-  forall_matchSet(mit, matchSet){
-    forall_match(lit, (**mit)){
-      if((*lit) == bottom){
-	flag =true; 
-	break;
-      }
-    }
-    if(flag) {
-      literalt s_m = getMatchLiteral(*mit);
-      rhs.push_back(s_m);
-      flag = false;
-    }
+  CB A(env->id, env->index);
+  assert(env->isMultiRecv && env->isbottom);
+  
+  std::map<CB, std::set<literalt> >::iterator it = match2symMap_MultiRecv.find(A);
+  if( it != match2symMap_MultiRecv.end()){
+    rhs.assign(it->second.begin(), it->second.end());
+    assert(rhs.size() == it->second.size());
   }
+  else assert(false);
+  
 }
 
+// Match correct: m_a <-> exactly(card(a), U s_ab/ba)
+// Match count: atmost(card(a), U s_ba)
+// 13,14
 void OptEncoding::createRFSomeConstraint()
 {
   bvt rhs; 
@@ -614,73 +692,69 @@ void OptEncoding::createRFSomeConstraint()
   bool flag = false;
   formula << "****RFSOME****" << std::endl; 
   //slv->constraintStream << "****RFSOME****" << std::endl; 
+ 
   forall_transitionLists(iter, last_node->_tlist){
     forall_transitions(titer, (*iter)->_tlist){
+    
       Envelope * envA = titer->GetEnvelope();
+      CB A(envA->id, envA->index);            
+      int cardinality;
+
       if(envA->func_id == FINALIZE) continue;
-      CB A(envA->id, envA->index);
-      m_a = getMILiteral(A).first;
+      
       if(envA->isRecvType() || envA->isSendType()) {
-	forall_matchSet(mit, matchSet){
-	  forall_match(lit, (**mit)){
-	    if((*lit) == A) {
-	      flag = true; 
-	      break;
+	m_a = getMILiteral(A).first;
+	// Skip if multirecv and not bottom
+	if(envA->isMultiRecv && !envA->isbottom) continue; 
+	else {// either not multiRecv or multiRecv that is bottom
+	  if(envA->isbottom) { // if bottom
+	    cardinality = envA->cardinality;  
+	    // get the s_m from all the matches for bottom
+	    construct_multirecv_match(rhs, envA);
+	  }
+	  else {// not a multirecv
+	    cardinality = 1;
+	    forall_matchSet(mit, matchSet){
+	      forall_match(lit, (**mit)){
+		if((*lit) == A) {
+		  flag = true; 
+		  break;
+		}
+	      }
+	      if(flag){
+		s_m = getMatchLiteral(*mit);
+		rhs.push_back(s_m);
+		flag = false;
+	      }
 	    }
 	  }
-	  if(flag){
-	    s_m = getMatchLiteral(*mit);
-	    rhs.push_back(s_m);
-	    flag = false;
-	  }
-	}
-	if(!rhs.empty()){
-	  //slv->l_set_to(slv->limplies(m_a, slv->lor(rhs)) , true);
-	  // formula << "(" << getLitName(m_a,1) << " -> (";
-	  // for(bvt::iterator bit = rhs.begin(); bit != rhs.end(); bit++){
-	  //   formula << getLitName(*bit,0) << " | ";  
-	  // }
-	  // formula << ")) &" << std::endl;
-	  int cardinality;
-	  if(envA->isSendType() || (envA->isRecvType() && 
-				    !multiRs.isPresent(A))){
-	    cardinality = 1;
-	  }
-	  else { // multiRecv entry
-	  
-	    // if not bottom then iterate towards the bottom
-	    if (!envA->isbottom) continue; 
+	  if(!rhs.empty()){
+	    formulat fo_atmost; 
+	    commander_encodingt se(*slv);
+	    se.atmostk(rhs, cardinality, fo_atmost);
+	    se.add_to_prop(fo_atmost);
 	    
-	    // if bottom
-	    cardinality = envA->cardinality; 
+	    formulat fo_exactly;
+	    se.exactlyk(rhs, cardinality, fo_exactly);
+	    literalt card_lit_exactly = se.get_lit_for_formula(fo_exactly);
 	    
-	    // construct the union of match-sets for all 
-	    // recevs in the multirecv
-	    construct_multirecv_match(rhs, A);
+	    slv->l_set_to(slv->limplies(m_a, card_lit_exactly) , true);
+	    slv->l_set_to(slv->limplies(card_lit_exactly, m_a) , true);
+	    
+	    rhs.clear();
 	  }
-	  
-	  formulat fo_atmost; 
-	  commander_encodingt se(*slv);
-	  se.atmostk(rhs, cardinality, fo_atmost);
-	  se.add_to_prop(fo_atmost);
-
-	  formulat fo_exactly;
-          se.exactlyk(rhs, cardinality, fo_exactly);
-          literalt card_lit_exactly = se.get_lit_for_formula(fo_exactly);
-           
-	  slv->l_set_to(slv->limplies(m_a, card_lit_exactly) , true);
-	  slv->l_set_to(slv->limplies(card_lit_exactly, m_a) , true);
-
-	  rhs.clear();
-	}
-	else {
-	  assert(false); // m_a has no match -- NOT POSSIBLE!
+	  else {
+	    assert(false); // m_a has no match -- NOT POSSIBLE!
+	  }
 	}
       }
     }
   }
 }
 
+
+// Constraint: S_ab => m_a /\ m_b
+// Matched Only
 void OptEncoding::createMatchConstraint()
 {
   literalt m_a; 
@@ -708,7 +782,7 @@ void OptEncoding::createMatchConstraint()
 }
 
 
-
+//Constraint:  unique match for send constraint
 void OptEncoding::uniqueMatchSend()
 {
   literalt s_m;
@@ -736,6 +810,8 @@ void OptEncoding::uniqueMatchSend()
   }
 }
 
+
+//Constraint: unique match for recv constraint
 void OptEncoding::uniqueMatchRecv()
 {
   literalt s_m;
@@ -764,23 +840,31 @@ void OptEncoding::uniqueMatchRecv()
   }
 }
 
-
+// Constraint: \/_{match(a,b)} (m_a \/ ~r_a)
+// 15
 void OptEncoding::noMoreMatchesPossible()
 {
   bvt c;
+  bool flag = false;
   formula << "****noMoreMatchesPossible****" << std::endl; 
   //slv->constraintStream << "****noMoreMatchesPossible****" << std::endl; 
   forall_matchSet(mit, matchSet){
     formula << "(";
     forall_match(lit, (**mit)){
-      std::pair<literalt,literalt> p = getMILiteral(*lit);
-      if(last_node->GetTransition(*lit)->GetEnvelope()->isSendType() ||
-	 last_node->GetTransition(*lit)->GetEnvelope()->isRecvType()){
+      Envelope * envA = last_node->GetTransition(*lit)->GetEnvelope();
+      if(envA->isSendType() ||envA->isRecvType()){
+	if(envA->isMultiRecv && !envA->isbottom) {
+	  flag =true; break;
+	}
+	std::pair<literalt,literalt> p = getMILiteral(*lit);
 	c.push_back(p.first);
 	c.push_back(slv->lnot(p.second));
 	formula << getLitName(p.first,1) << " | " 
 		<< "!" << getLitName(p.first, 3) << " | ";
       }
+    }
+    if(flag){
+      flag = false; continue;
     }
     if(!c.empty()){
       slv->l_set_to(slv->lor(c), true);
@@ -791,7 +875,8 @@ void OptEncoding::noMoreMatchesPossible()
 }
 
 
-
+// Constraint: r_b <=> /\_{a \in Imm'(b)} m_a
+// 16
 void OptEncoding::alternateAllAncestorsMatched()
 {
   bvt rhs;
@@ -802,14 +887,7 @@ void OptEncoding::alternateAllAncestorsMatched()
       Envelope *envA = titer->GetEnvelope();
       if(envA->func_id == FINALIZE) continue;
       CB A (envA->id, envA->index);
-   
-      bool blk_wildcard_recv = ( envA->isRecvType() && 
-				 envA->isBlockingType() && 
-				 (envA->src == WILDCARD));
-      bool is_A_multirecv = blk_wildcard_recv? multiRs.isPresent(A):false;
-
-      if(is_A_multirecv && !envA->isbottom) continue;
-
+      if(envA->isMultiRecv && !envA->isbottom) continue;
       std::pair<literalt, literalt> p = getMILiteral(A);
       literalt m_a = p.first;
       literalt i_a = p.second;
@@ -817,6 +895,8 @@ void OptEncoding::alternateAllAncestorsMatched()
       // 	formula << "(" << getLitName(m_a,4) << " <-> (";
       //      else
       formula  << "(" << getLitName(m_a,3) << " <-> (" ;
+      //[svs]: is bottom then go to top of multiRecv; 
+      //then obtain the ancestors of top
       if (envA->isbottom) {
 	formula << "viatop ";
 	A._pid = envA->corresponding_top_id;
@@ -850,35 +930,45 @@ void OptEncoding::alternateAllAncestorsMatched()
 }
 
 
+//CONSTRAINT: /\_{a \in C} m_a => r_a
+// 18
 void OptEncoding::matchImpliesIssued()
 {
 
   formula << "****matchImpliesIssued***" << std::endl;
-  forall_matchSet(mit, matchSet){
-
-    CB A = (**mit).front();
-    CB B = (**mit).back();
-    Envelope * envA = last_node->GetTransition(A)->GetEnvelope();
-    Envelope * envB = last_node->GetTransition(B)->GetEnvelope();
-    if(envA->isCollectiveType() || envA->func_id == FINALIZE)
-      continue;
-    // svs: why not any check for the multireceives??
-    bool blk_wildcard_recv = ( envB->isRecvType() && 
-			       envB->isBlockingType() && 
-			       (envB->src == WILDCARD));
-    bool is_B_multirecv = blk_wildcard_recv? multiRs.isPresent(B):false;
-    
-    if(is_B_multirecv && !envB->isbottom) continue;
-    
-    literalt s_ab = getMatchLiteral(*mit);
-    literalt i_a = getMILiteral(A).second;
-    literalt i_b = getMILiteral(B).second;
-    slv->l_set_to(slv->limplies(s_ab, i_a), true);
-    slv->l_set_to(slv->limplies(s_ab, i_b), true);
-    formula << getLitName(s_ab, 0) << " -> " << getLitName(i_a, 3) << " &" << std::endl;
-    formula << getLitName(s_ab, 0) << " -> " << getLitName(i_b, 3) << " &" << std::endl;
+  //  forall_matchSet(mit, matchSet){
+  forall_transitionLists(iter, last_node->_tlist){
+    forall_transitions(titer, (*iter)->_tlist){
+      
+      Envelope * envA = titer->GetEnvelope();
+      CB A  (envA->id, envA->index);
+      // CB A = (**mit).front();
+      // CB B = (**mit).back();
+      // Envelope * envA = last_node->GetTransition(A)->GetEnvelope();
+      // Envelope * envB = last_node->GetTransition(B)->GetEnvelope();
+      
+      if(envA->isCollectiveType() || envA->func_id == FINALIZE)
+	continue;
+      
+      if(envA->isMultiRecv && !envA->isbottom) continue;
+      
+      // if(envB->isbottom){
+      
+      // literalt s_ab = getMatchLiteral(*mit);    
+      // }
+      literalt m_a = getMILiteral(A).first;      
+      literalt i_a = getMILiteral(A).second;
+            
+      // slv->l_set_to(slv->limplies(s_ab, i_a), true);
+      // slv->l_set_to(slv->limplies(s_ab, i_b), true);
+      // formula << getLitName(s_ab, 0) << " -> " << getLitName(i_a, 3) << " &" << std::endl;
+      // formula << getLitName(s_ab, 0) << " -> " << getLitName(i_b, 3) << " &" << std::endl;
+      
+      slv->l_set_to(slv->limplies(m_a, i_a),true);
+    }
   }
 
+  // for collectives
   forall_matchSet(mit, matchSet){
     CB A = (**mit).front();
     Envelope *front = 
@@ -901,11 +991,11 @@ void OptEncoding::matchImpliesIssued()
 	assert(false);
     }
   }
-
 }
 
 
-
+// CONSTRAINT: \/_{a \in C} ~m_a
+// 17
 void OptEncoding::notAllMatched()
 {
   bvt c;
@@ -918,12 +1008,8 @@ void OptEncoding::notAllMatched()
       CB A(envA->id, envA->index);
 
       if(envA->func_id == FINALIZE) continue;
-      bool blk_wildcard_recv = ( envA->isRecvType() && 
-				 envA->isBlockingType() && 
-				 (envA->src == WILDCARD));
-      bool is_A_multirecv = blk_wildcard_recv? multiRs.isPresent(A):false;
 
-      if(is_A_multirecv && !envA->isbottom) continue;
+      if(envA->isMultiRecv && !envA->isbottom) continue;
 
       literalt m_a = getMILiteral(A).first;
       c.push_back(slv->lnot(m_a));
@@ -946,8 +1032,8 @@ void OptEncoding::waitMatch()
       Envelope *envA = titer->GetEnvelope();
       if(envA->func_id == FINALIZE) continue;
       CB A(envA->id, envA->index);
-      literalt m_a = getMILiteral(A).first;
       if(envA->func_id == WAIT || envA->func_id == WAITALL) {
+	literalt m_a = getMILiteral(A).first;
 	std::vector<int> ancs = titer->get_ancestors();
 	for(std::vector<int>::iterator sit = ancs.begin(); 
 	    sit != ancs.end(); sit++){
@@ -976,8 +1062,6 @@ void OptEncoding::waitMatch()
     }
   }
 }
-
-
 
 void OptEncoding::publish()
 {
@@ -1086,11 +1170,12 @@ void OptEncoding::publish()
   }
 }
 
-
 void OptEncoding::generateConstraints()
 {
+  
+
   discoverMultiReceives();
-   createMatchSet();
+  createMatchSet();
   //  printMatchSet();
   //std::cout << formula.str();
   createEventLiterals();

@@ -19,8 +19,6 @@ bool multiReceive::isPresent(CB a)
     }
   }
   return false;
-  // for a multireceive can we also merge the match-sets of 
-  // all the receives in the multireceive.
 }
 
 void multiReceive::print()

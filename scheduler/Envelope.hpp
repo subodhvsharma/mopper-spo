@@ -71,8 +71,10 @@ public:
   int cardinality;
   int corresponding_top_id;
   int corresponding_top_index;
+  int corresponding_bottom_index;
   bool istop; 
   bool isbottom;
+  bool isMultiRecv;
 
     void ref_inc();
     void ref_dec();

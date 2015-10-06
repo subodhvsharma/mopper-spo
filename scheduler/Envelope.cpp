@@ -255,8 +255,10 @@ Envelope::Envelope() {
     cardinality = -1; 
     isbottom = false;
     istop = false;
+    isMultiRecv = false;
     corresponding_top_id = -1;
     corresponding_top_index = -1;
+    corresponding_bottom_index = -1;
 }
 
 Envelope::Envelope(const Envelope &e) {

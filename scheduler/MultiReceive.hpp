@@ -9,6 +9,7 @@ public:
   multiReceive(){}
   ~multiReceive(){}
   bool isPresent(CB a);
+  bool isPresent(Envelope * env);
   void print();
   
 public:
