@@ -10,6 +10,7 @@ public:
  
   void discoverMultiReceives();
   void construct_multirecv_match(bvt &rhs, Envelope *env); 
+  void construct_nonmultirecv_match(bvt &rhs, Envelope *env); 
   //creation of literals m_a, i_a,
   // and bitvectors for maintaining clocks
   void createEventLiterals();

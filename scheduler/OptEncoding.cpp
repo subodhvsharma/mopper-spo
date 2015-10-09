@@ -254,9 +254,30 @@ std::pair<literalt,literalt> OptEncoding::getMILiteral(CB A)
 
 literalt OptEncoding::getMatchLiteral(MatchPtr mptr)
 {
-  std::string symbol = match2symMap.find(mptr)->second;
-  return matchMap.find(symbol)->second;
+  CB send = (*mptr).front(); 
+  CB recv = (*mptr).back();
+  Envelope *envR = last_node->GetTransition(recv)->GetEnvelope();
+  
+  if (!envR->isMultiRecv){
+    std::string symbol = match2symMap.find(mptr)->second;
+    return matchMap.find(symbol)->second;
+  }
+  else {
+    assert (envR->isMultiRecv && envR->isbottom);
+
+    std::stringstream uniquepair;
+    std::string matchNumeral;
+
+    uniquepair<<send._pid;
+    uniquepair<<send._index;
+    uniquepair<<recv._pid;
+    uniquepair<<recv._index;
+    matchNumeral = uniquepair.str(); 
+
+    return matchMap_MultiRecv.find(matchNumeral)->second;
+  }
 }
+
 
 MatchPtr OptEncoding::getMPtr(CB A) 
 {
@@ -518,6 +539,7 @@ void OptEncoding:: discoverMultiReceives()
     Envelope * envTop = last_node->GetTransition(top)->GetEnvelope();
     Envelope * envBottom = last_node->GetTransition(bottom)->GetEnvelope();
     envTop->istop = true;
+    envTop->isMultiRecv = true;
     envBottom->isbottom = true;
     // envBottom->corresponding_top_index = top._index;
     envTop->corresponding_bottom_index = bottom._index;
@@ -606,7 +628,7 @@ void OptEncoding::createClkLiterals()
   }
 }
 
-// CONSTRAINT: 
+// CONSTRAINT: 19 clock equality; S_ab => clk_a = clk_b
 void OptEncoding::createRFConstraint()
 {
   bool flag = false;
@@ -621,16 +643,19 @@ void OptEncoding::createRFConstraint()
       }
     }
     if(flag){ // hoping it to be a send-receive match
-      assert((**mit).size() == 2);
+
       CB A = (**mit).front();
       CB B = (**mit).back();
-      
+
+      Envelope * envR = last_node->GetTransition(B)->GetEnvelope();
+ 
+      if (envR->isMultiRecv && !envR->isbottom) {
+	flag = false;
+	continue;
+      }
       bvt Abv;
       Abv = getEventBV(A);
       literalt s_ab = getMatchLiteral(*mit);
-
-      Envelope * envR = last_node->GetTransition(B)->GetEnvelope();
-      assert (envR->isRecvType());
 
       if (envR->isbottom){ // [svs]: What happens to MultiR recvs that are not bottom
 	
@@ -682,6 +707,35 @@ void OptEncoding::construct_multirecv_match(bvt & rhs, Envelope * env)
   
 }
 
+void OptEncoding::construct_nonmultirecv_match(bvt & rhs, Envelope *envA)
+{
+  literalt s_m;
+  bool flag = false;
+
+  CB A(envA->id, envA->index);
+  assert(!envA->isMultiRecv);
+
+  forall_matchSet(mit, matchSet){
+    Envelope *envB = last_node->GetTransition((**mit).back())->GetEnvelope();
+    forall_match(lit, (**mit)){
+      if((*lit) == A) {
+	if(envA->isSendType()){
+	  // skip if Recv match for Send is a multirecv and !bottom
+	  if(envB->isMultiRecv && !envB->isbottom)
+	    continue;
+	}
+	flag = true; 
+	break;
+      }
+    }
+    if(flag){
+     	s_m = getMatchLiteral(*mit);
+	rhs.push_back(s_m);
+	flag = false;
+    }
+  }
+}
+
 // Match correct: m_a <-> exactly(card(a), U s_ab/ba)
 // Match count: atmost(card(a), U s_ba)
 // 13,14
@@ -690,6 +744,7 @@ void OptEncoding::createRFSomeConstraint()
   bvt rhs; 
   literalt s_m, m_a;
   bool flag = false;
+  bool bottomFlag = false;
   formula << "****RFSOME****" << std::endl; 
   //slv->constraintStream << "****RFSOME****" << std::endl; 
  
@@ -700,33 +755,19 @@ void OptEncoding::createRFSomeConstraint()
       CB A(envA->id, envA->index);            
       int cardinality;
 
-      if(envA->func_id == FINALIZE) continue;
-      
       if(envA->isRecvType() || envA->isSendType()) {
-	m_a = getMILiteral(A).first;
 	// Skip if multirecv and not bottom
 	if(envA->isMultiRecv && !envA->isbottom) continue; 
 	else {// either not multiRecv or multiRecv that is bottom
+	  m_a = getMILiteral(A).first;
 	  if(envA->isbottom) { // if bottom
 	    cardinality = envA->cardinality;  
 	    // get the s_m from all the matches for bottom
 	    construct_multirecv_match(rhs, envA);
 	  }
-	  else {// not a multirecv
+	  else {// either a Send or Recv which is not a multirecv
 	    cardinality = 1;
-	    forall_matchSet(mit, matchSet){
-	      forall_match(lit, (**mit)){
-		if((*lit) == A) {
-		  flag = true; 
-		  break;
-		}
-	      }
-	      if(flag){
-		s_m = getMatchLiteral(*mit);
-		rhs.push_back(s_m);
-		flag = false;
-	      }
-	    }
+	    construct_nonmultirecv_match(rhs, envA);
 	  }
 	  if(!rhs.empty()){
 	    formulat fo_atmost; 
@@ -852,8 +893,12 @@ void OptEncoding::noMoreMatchesPossible()
     formula << "(";
     forall_match(lit, (**mit)){
       Envelope * envA = last_node->GetTransition(*lit)->GetEnvelope();
+      Envelope * envB = last_node->GetTransition((**mit).back())->GetEnvelope();
       if(envA->isSendType() ||envA->isRecvType()){
 	if(envA->isMultiRecv && !envA->isbottom) {
+	  flag =true; break;
+	}
+	if(envA->isSendType() && envB->isMultiRecv && !envB->isbottom){
 	  flag =true; break;
 	}
 	std::pair<literalt,literalt> p = getMILiteral(*lit);
@@ -1152,6 +1197,11 @@ void OptEncoding::publish()
   }
   forall_matchSet(mit, matchSet){
     CB A = (**mit).front();
+    CB B = (**mit).back();
+    
+    Envelope* recv = last_node->GetTransition(B)->GetEnvelope();
+    if(recv->isMultiRecv && !recv->isbottom) continue;
+
     if(last_node->GetTransition(A)->GetEnvelope()->isSendType()){
       literalt s_ab = getMatchLiteral(*mit);
       switch(slv->l_get(s_ab).get_value()){ 
