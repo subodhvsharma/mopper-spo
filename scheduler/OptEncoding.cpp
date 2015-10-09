@@ -380,6 +380,10 @@ std::string OptEncoding::getLitName(literalt lt, int type)
     }
     return ss.str();
   }
+  case 5: {
+    ss << "S_" << revMatchMap_MultiRecv.find(lt)->second;
+    return ss.str();
+  }
   default:
     assert(false);
     
@@ -673,8 +677,8 @@ void OptEncoding::createRFConstraint()
 	
 	slv->l_set_to(slv->limplies(s_ab, e_abtop), true);
 	slv->l_set_to(slv->limplies(s_ab, e_abbot), true);
-	formula << "(" << getLitName(s_ab, 0) << " -> " 
-		<< A._pid << A._index << "between (" << B_top._pid << B_top._index << "," << B_bot._pid << B_bot._index << ") & " <<std::endl;
+	// formula << "(" << getLitName(s_ab, 0) << " -> " 
+	// 	<< A._pid << A._index << "between (" << B_top._pid << B_top._index << "," << B_bot._pid << B_bot._index << ") & " <<std::endl;
       //getClkLitName(c_ab, A, B) << ") & " <<std::endl;
       }
       else {
@@ -682,8 +686,8 @@ void OptEncoding::createRFConstraint()
 	literalt e_ab = bvUtils->equal(Abv, Bbv);  // [svs]: clk_a = clk_b
 	
 	slv->l_set_to(slv->limplies(s_ab, e_ab), true);
-	formula << "(" << getLitName(s_ab, 0) << " -> " 
-		<< "e_ab" <<  ") & " <<std::endl;
+	// formula << "(" << getLitName(s_ab, 0) << " -> " 
+	// 	<< "e_ab" <<  ") & " <<std::endl;
 	//getClkLitName(c_ab, A, B) << ") & " <<std::endl;
       }
     }
@@ -812,12 +816,12 @@ void OptEncoding::createMatchConstraint()
     if(!rhs.empty()){
       literalt s_m = getMatchLiteral(*mit);
       slv->l_set_to(slv->limplies(s_m, slv->land(rhs)), true);
-      formula << "(" << getLitName(s_m, 0) << " -> (";
-      for(bvt::iterator bit = rhs.begin(); bit != rhs.end(); bit++){
-	formula << getLitName(*bit,1) << " & ";  
-      }
+      //formula << "(" << getLitName(s_m, 0) << " -> (";
+      //for(bvt::iterator bit = rhs.begin(); bit != rhs.end(); bit++){
+	//formula << getLitName(*bit,1) << " & ";  
+      //}
       rhs.clear();
-      formula << ")) &" << std::endl;
+      //formula << ")) &" << std::endl;
     }
   }
 }
@@ -904,8 +908,8 @@ void OptEncoding::noMoreMatchesPossible()
 	std::pair<literalt,literalt> p = getMILiteral(*lit);
 	c.push_back(p.first);
 	c.push_back(slv->lnot(p.second));
-	formula << getLitName(p.first,1) << " | " 
-		<< "!" << getLitName(p.first, 3) << " | ";
+	// formula << getLitName(p.first,1) << " | " 
+	// 	<< "!" << getLitName(p.first, 3) << " | ";
       }
     }
     if(flag){
@@ -915,7 +919,7 @@ void OptEncoding::noMoreMatchesPossible()
       slv->l_set_to(slv->lor(c), true);
       c.clear();
     }
-    formula << ") &" << std::endl;
+    //    formula << ") &" << std::endl;
   }
 }
 
@@ -939,7 +943,7 @@ void OptEncoding::alternateAllAncestorsMatched()
       // if(envA->isCollectiveType())
       // 	formula << "(" << getLitName(m_a,4) << " <-> (";
       //      else
-      formula  << "(" << getLitName(m_a,3) << " <-> (" ;
+      //formula  << "(" << getLitName(m_a,3) << " <-> (" ;
       //[svs]: is bottom then go to top of multiRecv; 
       //then obtain the ancestors of top
       if (envA->isbottom) {
@@ -956,10 +960,10 @@ void OptEncoding::alternateAllAncestorsMatched()
 	rhs.push_back(q.first);
       }
       if(!rhs.empty()){
-	for(bvt::iterator bit = rhs.begin(); bit!=rhs.end(); bit++){
-	  formula << getLitName(*bit, 1) << " & "; 
-	}
-	 formula << ")";  
+	// for(bvt::iterator bit = rhs.begin(); bit!=rhs.end(); bit++){
+	//   formula << getLitName(*bit, 1) << " & "; 
+	// }
+	//  formula << ")";  
 	slv->l_set_to(slv->land(slv->limplies(slv->land(rhs),i_a), 
 			      slv->limplies(i_a, slv->land(rhs))), true);
 	
@@ -1061,7 +1065,7 @@ void OptEncoding::notAllMatched()
       // if(envA->isCollectiveType())
       // 	formula << "!" << getLitName(m_a,2) << " | ";
       // else
-      formula << "!" << getLitName(m_a,1) << " | ";
+      //formula << "!" << getLitName(m_a,1) << " | ";
     }
   }
   formula << ")" << std::endl;
@@ -1092,11 +1096,11 @@ void OptEncoding::waitMatch()
 	if(!rhs.empty()){
 	  slv->l_set_to(slv->land(slv->limplies(m_a, slv->land(rhs)),
 				slv->limplies(slv->land(rhs), m_a)), true);
-	  formula << "(" << getLitName(m_a, 1) << " <-> (";
-	  for(bvt::iterator bit = rhs.begin(); bit != rhs.end(); bit++){
-	    formula << getLitName(*bit, 1) << " & " ;
-	  }
-	  formula << ")) &" << std::endl;
+	  // formula << "(" << getLitName(m_a, 1) << " <-> (";
+	  // for(bvt::iterator bit = rhs.begin(); bit != rhs.end(); bit++){
+	  //   formula << getLitName(*bit, 1) << " & " ;
+	  // }
+	  // formula << ")) &" << std::endl;
 	  rhs.clear();
 	  }
 	else{
@@ -1119,12 +1123,8 @@ void OptEncoding::publish()
       Envelope *envA = (*titer).GetEnvelope();
       CB A(envA->id, envA->index);
       if(envA->func_id == FINALIZE) continue;
-      bool blk_wildcard_recv = ( envA->isRecvType() && 
-				 envA->isBlockingType() && 
-				 (envA->src == WILDCARD));
-      bool is_A_multirecv = blk_wildcard_recv? multiRs.isPresent(A):false;
-
-      if(is_A_multirecv && !envA->isbottom) continue;
+      
+      if(envA->isMultiRecv && !envA->isbottom) continue;
       
 
       literalt m_a = getMILiteral(A).first;
@@ -1206,13 +1206,22 @@ void OptEncoding::publish()
       literalt s_ab = getMatchLiteral(*mit);
       switch(slv->l_get(s_ab).get_value()){ 
       case tvt::TV_TRUE:
-	formula << getLitName(s_ab,0 ) << ":1" << std::endl;
+	if(!recv->isbottom)
+	  formula << getLitName(s_ab,0 ) << ":1" << std::endl;
+	else
+	  formula << getLitName(s_ab,5 ) << ":1" << std::endl;
 	break;
       case tvt::TV_FALSE:
-	formula << getLitName(s_ab, 0) << ":0" << std::endl;
+	if(!recv->isbottom)
+	  formula << getLitName(s_ab, 0) << ":0" << std::endl;
+	else
+	  formula << getLitName(s_ab, 5) << ":0" << std::endl;
 	break;
       case tvt::TV_UNKNOWN:
-	formula << getLitName(s_ab, 0) << ":UNKNOWN" << std::endl;
+	if(!recv->isbottom)
+	  formula << getLitName(s_ab, 0) << ":UNKNOWN" << std::endl;
+	else
+	  formula << getLitName(s_ab, 5) << ":UNKNOWN" << std::endl;
 	break;
       default: assert(false);
       }
