@@ -9,7 +9,7 @@
 
 typedef std::list<CB> PE;
 
-typedef std::pair<int, int> ME;
+typedef std::pair<int, int> ME; //
 
 struct mapComp1 {
   bool operator () ( const ME & fst, const ME& snd) const
