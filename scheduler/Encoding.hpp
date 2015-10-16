@@ -17,7 +17,7 @@ typedef std::list<CB>  Match;
 
 typedef std::pair<std::string, int> StrIntPair;
 
-typedef std::vector<MatchPtr>::iterator MIter;
+typedef std::set<MatchPtr>::iterator MIter;
 typedef Match::iterator LIter;
 
 typedef std::vector<TransitionList *>::iterator TLIter;
@@ -52,7 +52,8 @@ public:
   virtual std::string getLitName(literalt a);
   void createMatchSet();  
   void printMatchSet();
-  
+  bool isPresent(MatchPtr m);
+
   Node* last_node; 
   int traceSize;
   M* _m;
@@ -63,7 +64,7 @@ public:
   //satcheck_simplifiert  slv;
   bv_utilst * bvUtils;  
 
-  std::vector<MatchPtr> matchSet;
+  std::set<MatchPtr> matchSet;
   std::map<StrIntPair, literalt> sym2lit; 
   std::map<literalt, StrIntPair > lit2sym; 
   bool _deadlock_found;

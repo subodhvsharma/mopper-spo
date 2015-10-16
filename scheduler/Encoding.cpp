@@ -17,8 +17,8 @@ Encoding::Encoding(ITree *it, M *m, propt *_slv)
   one = slv->new_variable();
   zero = slv->new_variable();
 
-  // slv->constraintStream << "one = " << one.get() <<std::endl; 
-  // slv->constraintStream << "zero = " << zero.get() <<std::endl; 
+  //slv->constraintStream << "one = " << one.get() <<std::endl; 
+  //xslv->constraintStream << "zero = " << zero.get() <<std::endl; 
   // setting one to true and zero to false
 
   slv->l_set_to(one, true);
@@ -50,7 +50,7 @@ void Encoding::createMatchSet()
     Envelope *env = t->GetEnvelope();
     // check whether match is a non send-recv one
     if( env->isCollectiveType() &&  !(env->func_id == FINALIZE)){
-      matchSet.push_back(&(_it->_slist[i]->curr_match_set));
+      matchSet.insert(&(_it->_slist[i]->curr_match_set));
     }
   }
   //for SR matches
@@ -58,7 +58,7 @@ void Encoding::createMatchSet()
   mitend = _m->_MSet.end();
   for (mit = _m->_MSet.begin(); mit != mitend; mit++){
     assert(!(*mit).second.empty());
-    matchSet.push_back(&((*mit).second));
+    matchSet.insert(&((*mit).second));
   }
 }
 
@@ -75,7 +75,13 @@ void Encoding::printMatchSet()
   
 }
 
-
+bool Encoding::isPresent(MatchPtr m)
+{
+  MIter mpiter = matchSet.find(m);
+  if(mpiter != matchSet.end())
+    return true;
+  return false;
+}
 
 ////////////////////////////////////////////////////////////
 /////                                                ///////

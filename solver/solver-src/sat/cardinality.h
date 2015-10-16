@@ -9,14 +9,17 @@
 
 
 #include <solver-src/prop/prop.h>
+#include <solver-src/prop/literal.h>
+#include <utility>
+#include <memory>
 #include <vector>
 #include <list>
 #include<algorithm>
 #include <set>
 #include <iterator>
-#ifdef DEBUG
-#include<iostream>
-#endif
+/* #ifdef DEBUG */
+/* #include<iostream> */
+/* #endif */
 
 typedef std::list<bvt> formulat;
 class  encodingt
@@ -57,21 +60,21 @@ class  encodingt
       }  
       return true;
     }
-#ifdef DEBUG
-    virtual void print_formula(std::ostream& out,formulat& formula)
-    {
-      for(formulat::iterator it=formula.begin();
-          it!=formula.end();it++)
-      {
-        for(bvt::iterator bit=it->begin();
-            bit!=it->end();bit++)
-        {
-          out << bit->dimacs() << " ";
-        }
-        out << std::endl;
-      }
-    }
-#endif
+/* #ifdef DEBUG */
+/*     virtual void print_formula(std::ostream& out,formulat& formula) */
+/*     { */
+/*       for(formulat::iterator it=formula.begin(); */
+/*           it!=formula.end();it++) */
+/*       { */
+/*         for(bvt::iterator bit=it->begin(); */
+/*             bit!=it->end();bit++) */
+/*         { */
+/*           out << bit->dimacs() << " "; */
+/*         } */
+/*         out << std::endl; */
+/*       } */
+/*     } */
+/* #endif */
 
     virtual ~encodingt() {}
     /***************************************************************************\
@@ -144,6 +147,118 @@ class sequential_encodingt : public encodingt
     virtual bool atmostk(const bvt& literals,unsigned int k,
         formulat& formula);
 };
+
+class sequential_encoding_internalt : public sequential_encodingt
+{
+
+	public:
+		virtual bool atmostk(const bvt& literals,unsigned int k);
+		virtual bool atleastk(const bvt& literals,unsigned int k);
+		virtual bool exactlyk(const bvt& literals,unsigned int k); 
+		virtual literalt get_lit_for_formula();
+/* #ifdef DEBUG */
+/* 		virtual void print_formula(std::ostream& out) */
+/* 		{ */
+/* 			encodingt::print_formula(out,formula); */
+/* 		} */
+/* #endif */
+		sequential_encoding_internalt(propt& _prop):sequential_encodingt(_prop)
+	{
+		already_used=false;
+		formula.clear();
+	}
+	protected:
+		literalt equi_lit;
+		formulat formula;
+		bool already_used;
+};
+
+class totalizer_encodingt : public encodingt
+{
+protected:
+	virtual bool exactlyk(unsigned int k, const bvt& iliterals,bvt& oliterals,formulat& formula);
+	virtual bool atmostk(unsigned int k,const bvt& iliterals, bvt& oliterals,formulat& formula);
+	virtual bool atleastk(unsigned int k,const bvt& iliterals, bvt& oliterals,formulat& formula);
+public:
+	totalizer_encodingt(propt& _prop): encodingt(_prop){}
+	virtual bool exactlyk(const bvt& literals,unsigned int k, formulat& formula);
+	virtual bool atmostk(const bvt& literals,unsigned int k,formulat& formula);
+	virtual bool atleastk(const bvt& literals,unsigned int k,formulat& formula);
+};
+
+
+/*****************************************************************************
+ *
+ * Class : totalizer_encoding_iwt
+ *
+ * Members : iliterals - stores the reference to input literals
+ *           oliterals - stores the output literals of the cardinality sum
+ *           encoded by the totalizer encoding
+ *           status - stores the status if cardinality sum was successfully
+ *           encoded by the constructor or not
+ *
+ * 			  All the public methods from totalizer_encodingt returns false
+ * 			  as that interface must not be used for this class
+ *
+ * Purpose : this class implements incremental weakening approach given in
+ * CP 2014 paper "Incremental Cardinality constraints for MaxSAT". Only
+ * atmostk constraints are supported as of now.
+ *
+ ****************************************************************************/
+/* class totalizer_encoding_iwt	: public totalizer_encodingt */
+/* { */
+/* protected: */
+/* 	const bvt& iliterals; */
+/* 	bvt oliterals; */
+/* 	bool status; */
+
+/* public: */
+
+/* 	totalizer_encoding_iwt(propt& _prop,const bvt& literals,unsigned int _k=0); */
+/* 	virtual bool atmostk(unsigned int k,bvt& assumptions); */
+
+
+/* 	virtual bool exactlyk(const bvt& literals,unsigned int k, formulat& formula){return false;} */
+/* 	virtual bool atmostk(const bvt& literals,unsigned int k,formulat& formula){return false;} */
+/* 	virtual bool atleastk(const bvt& literals,unsigned int k,formulat& formula){return false;} */
+/* }; */
+
+
+/* class totalizer_encoding_iet	: public totalizer_encodingt */
+/* { */
+/* public: */
+/* 	class tot_tree_nodet; */
+/* 	typedef tot_tree_nodet* childrent; */
+/* 	class tot_tree_nodet */
+/* 	{ */
+/* 	public: */
+/* 		bvt oliterals; */
+/* 		unsigned int num_inputs; */
+
+/* 		childrent left; */
+/* 		childrent right; */
+/* 		tot_tree_nodet(){ left=NULL, right=NULL;} */
+/* 		~tot_tree_nodet(){ if(left!=NULL) delete left; */
+/* 				if(right!=NULL) delete right; */
+/* 				oliterals.clear(); */
+/* 				num_inputs=0; */
+/* 		} */
+
+/* 	}; */
+/*     totalizer_encoding_iet(propt& _prop,const bvt& literals,unsigned int _k); */
+
+/*     virtual bool atmostk(unsigned int k,bvt& assumptions); */
+
+/* protected: */
+/* 	//const bvt& iliterals; */
+/* 	const unsigned int isize; */
+/*     childrent root_node; */
+/*     bool status; */
+/*     unsigned int current_sum; */
+
+/*     bool delta_atmostk(unsigned int k,childrent node,formulat& formula); */
+/*     virtual bool create_atmostk(unsigned int k,const bvt& iliterals, childrent node,formulat& formula); */
+/* }; */
 
 /*****************************************************************************\
  * Function : subsets_k

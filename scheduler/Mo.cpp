@@ -518,9 +518,10 @@ void M::NewConstructAncs(Node *ncurr, Node* nlast)
 {
 
   if(ncurr->curr_match_set.back()._pid >= ncurr->NumProcs() || 
-     ncurr->curr_match_set.back()._pid < 0)
-    assert(false);
-  
+     ncurr->curr_match_set.back()._pid < 0){
+    //assert(false);
+    return;
+  }
   Envelope *renv;
   Envelope *senv;
   if (!ncurr->curr_match_set.empty()){

@@ -38,7 +38,7 @@ void SPOEncoding::createPossibleMatches()
     Envelope *env = t->GetEnvelope();
     // check whether match is a non send-recv one
     if(!(env->isSendType())){
-      matchSet.push_back(&(_it->_slist[i]->curr_match_set));
+      matchSet.insert(&(_it->_slist[i]->curr_match_set));
     }
   }
   //for SR matches
@@ -46,7 +46,7 @@ void SPOEncoding::createPossibleMatches()
   mitend = _m->_MSet.end();
   for (mit = _m->_MSet.begin(); mit != mitend; mit++){
     assert(!(*mit).second.empty());
-    matchSet.push_back(&((*mit).second));
+    matchSet.insert(&((*mit).second));
   }
 }
 

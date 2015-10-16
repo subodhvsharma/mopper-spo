@@ -43,6 +43,7 @@ public:
   void matchImpliesIssued();// match only  issued
   void createRFConstraint(); // clock equality
   void waitMatch(); // matches when waits have 
+  void createMatchReadyConstraint(); 
 
 #if 0  
   void createSerializationConstraint();
