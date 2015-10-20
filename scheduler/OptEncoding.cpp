@@ -20,6 +20,7 @@ unsigned OptEncoding::get_width(){
 unsigned OptEncoding::address_bits()
 {
   unsigned res, x=2;
+  //TODO change x*=2 to x<<1?
   for(res=1; x<eventSize; res+=1, x*=2);
   return res;
 }
@@ -853,14 +854,15 @@ void OptEncoding::createRFSomeConstraint()
 	    
 	    formulat fo_exactly;
 	    se.exactlyk(rhs, cardinality, fo_exactly);
-	    se.add_to_prop(fo_exactly);
-	    //literalt card_lit_exactly = se.get_lit_for_formula(fo_exactly);
+	    //se.add_to_prop(fo_exactly);
+	    literalt card_lit_exactly = se.get_lit_for_formula(fo_exactly);
+
+
+	     slv->l_set_to(slv->limplies(m_a, card_lit_exactly) , true);
+	     slv->l_set_to(slv->limplies(card_lit_exactly, m_a) , true);
+	     maCardMap[m_a]=card_lit_exactly;
+	     maInputMap[m_a]=std::pair<bvt,unsigned>(rhs,cardinality);
 	    
-	    // slv->l_set_to(card_lit_atmost , true);
-	    // slv->l_set_to(slv->limplies(m_a, card_lit_exactly) , true);
-	    // slv->l_set_to(slv->limplies(card_lit_exactly, m_a) , true);
-	    //slv->l_set_to(slv->land(slv->limplies(m_a, card_lit_exactly), 
-	    //                       slv->limplies(card_lit_exactly, m_a)) , true);
 	    //DEBUG PRINT
 	    formula << "(m_" <<A <<"<->" 
 		    << "(" << cardinality <<", {";
@@ -1268,12 +1270,23 @@ void OptEncoding::publish()
 	//   formula << getLitName(m_a, 2) << ":1" << std::endl;
 	// else
 	formula << getLitName(m_a, 1) << ":1" << std::endl;
+	assert(slv->l_get(m_a)==slv->l_get(maCardMap[m_a]));
+	{
+	unsigned set_inputs=0;
+	for(bvt::iterator in_it=maInputMap[m_a].first.begin();
+			 in_it!=maInputMap[m_a].first.end();in_it++)
+	{
+		if(slv->l_get(*in_it).is_true()) set_inputs++;
+	}
+	assert(maInputMap[m_a].second==set_inputs);
+	}
 	break;
       case tvt::TV_FALSE:
 	// if(envA->isCollectiveType())
 	//   formula << getLitName(m_a,2) << ":0" << std::endl;
 	// else
 	formula << getLitName(m_a,1) << ":0" << std::endl;
+	assert(slv->l_get(m_a)==slv->l_get(maCardMap[m_a]));
 	break;
       case tvt::TV_UNKNOWN:
 	// if(envA->isCollectiveType())
