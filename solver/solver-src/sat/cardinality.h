@@ -33,6 +33,7 @@ class  encodingt
 
     virtual void add_to_prop(formulat& formula);
     virtual literalt get_lit_for_formula(formulat& formula);
+    void set_enabling_lit_for_formula(formulat& formula,literalt l);
     virtual literalt get_enabling_lit_for_formula(formulat& formula);
     /*****************************************************************************\
      * Function : encodingt::sanity_check
@@ -48,7 +49,7 @@ class  encodingt
     {
       unsigned int size=literals.size();
       formula.clear();
-      if(size==0 || k==0) return false;
+      if(size==0) return false;
 
       std::set<unsigned int> tmpset;
 
@@ -99,6 +100,7 @@ class  encodingt
      */
     virtual bool atmostk(const bvt& literals,
         unsigned int k,formulat& formula)=0;
+    virtual bool atmostzero(const bvt& literals,formulat& formula);
 
 
     virtual bool atmostone(const bvt& literals,formulat& formula)

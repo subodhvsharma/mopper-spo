@@ -43,6 +43,16 @@ void encodingt::add_to_prop(formulat& formula)
     prop.lcnf((*it));
   }
 }
+bool encodingt::atmostzero(const bvt& literals,formulat& formula)
+{
+	for(bvt::const_iterator lit=literals.begin();lit!=literals.end();lit++)
+	{
+		bvt clause;
+		clause.push_back(!(*lit));
+		formula.push_back(clause);
+	}
+	return true;
+}
 /***************************************************************************\
  * Function : encodingt::get_lit_for_formula
  *
@@ -62,15 +72,18 @@ void encodingt::add_to_prop(formulat& formula)
 literalt encodingt::get_lit_for_formula(formulat& formula)
 {
   bvt tmp_formula;
-
   for(formulat::iterator it=formula.begin();
       it!=formula.end();it++)
   {
+
     literalt l =prop.lor(*it);
+
     tmp_formula.push_back(l);
 
   }
-  return prop.land(tmp_formula);
+     literalt f = prop.land(tmp_formula);
+
+  return f;
 
 }
 /*****************************************************************************\
@@ -111,6 +124,36 @@ literalt encodingt::get_enabling_lit_for_formula(formulat& formula)
   return l;
 
 }
+/***************************************************************************
+ *  Function : encodingt::set_enabling_lit_for_formula
+ *
+ *  Input : l - literal, formula
+ *
+ *  Output :
+ *
+ *  Purpose : every clause c in the formula is modified as c \vee \neg l.
+ *              This modified formula is added to the solver. Now
+ *              whenever l is TRUE, formula is enforced.
+ *  Precondition : Literal l must be a valid literal in the solver
+ *
+ */
+ void encodingt::set_enabling_lit_for_formula(formulat& formula,literalt l)
+{
+
+	literalt not_l = !l;
+
+  for(formulat::iterator it=formula.begin();
+      it!=formula.end();it++)
+  {
+
+    it->push_back(not_l);
+    prop.lcnf(*it);
+
+
+  }
+  return ;
+
+}
 /*****************************************************************************\
  * Function : encodingt::atleastk
  *
@@ -135,6 +178,12 @@ bool encodingt::atleastk(const bvt& literals,
   {
     //trivially true
     return true;
+  }
+  else if(k==1)
+  {
+	  //just add a clause
+	  formula.push_back(literals);
+	  return true;
   }
   else if(size==k)
   {
@@ -209,7 +258,7 @@ bool encodingt::exactlyk(const bvt& literals,
   if(!sanity_check(literals,k,formula)) return false;
 
   unsigned int size=literals.size();
-
+  if(k==0) return encodingt::atmostzero(literals,formula);
   if(size==k)
   {
     return atleastk(literals,k,formula);
@@ -306,6 +355,8 @@ bool binomial_encodingt::atmostk(const bvt& literals,
     formula.clear();
     return true;
   }
+  else if(k==0) return encodingt::atmostzero(literals,formula);
+  else if(k==1) return atmostone(literals,formula);
 
   std::list<std::list<literalt> > subsets;
 
@@ -348,6 +399,7 @@ bool commander_encodingt::atmostk(const bvt& literals,
   //is not guaranteed otherwise
   //size has to be nonzero
   if(gsize<=k || !sanity_check(literals,k,formula)) return false;
+  if(k==0) return encodingt::atmostzero(literals,formula);
   //if size<=k it is trivially true, return an empty formula
   if(size<=k) {formula.clear();return true;}
   //ngroup - number of groups
@@ -856,6 +908,7 @@ bool totalizer_encodingt::atmostk(const bvt& literals,unsigned int k,formulat& f
 {
 	if(!sanity_check(literals,k,formula)) return false;
 
+	if(k==0) return encodingt::atmostzero(literals,formula);
 	unsigned int size=literals.size();
 	//if size==k nothing needs to be done
 	if(size==k) return true;
@@ -881,7 +934,7 @@ bool totalizer_encodingt::exactlyk(const bvt& literals,unsigned int k, formulat&
 	if(!sanity_check(literals,k,formula)) return false;
 
 	unsigned int size=literals.size();
-
+    if(k==0) return encodingt::atmostzero(literals,formula);
 	if(size==k) return encodingt::atleastk(literals,k,formula);
 	if(size<k) return false;
 
@@ -910,6 +963,8 @@ bool totalizer_encodingt::atleastk(const bvt& literals,unsigned int k,formulat& 
 	if(!sanity_check(literals,k,formula)) return false;
 
 	unsigned int size=literals.size();
+	if(k==0) return true;
+	if(k==1) return encodingt::atleastone(literals,formula);
 	//if size==k nothing needs to be done
 	if(size==k) return encodingt::atleastk(literals,k,formula);
 
@@ -927,6 +982,7 @@ for(unsigned int i=0;i<k;i++)
 	clause.push_back(oliterals[i]);
 	formula.push_back(clause);
 }
+
 
 	return true;
 

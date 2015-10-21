@@ -105,8 +105,9 @@ public:
   std::map<MatchPtr, bvt> collBVMap;
   std::map<bvt, MatchPtr> revCollBVMap;
   
-  std::map<literalt,literalt> maCardMap;
+  //std::map<literalt,literalt> maCardMap;
   std::map<literalt,std::pair<bvt,unsigned> > maInputMap;
+  //std::map<literalt,std::set<literalt> > maLitsMap;
 
   unsigned width; 
   unsigned eventSize; 

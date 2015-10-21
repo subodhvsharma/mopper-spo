@@ -749,7 +749,22 @@ void OptEncoding::construct_multirecv_match(bvt & rhs, Envelope * env)
   assert(env->isMultiRecv && env->isbottom);
   
   std::map<CB, std::set<literalt> >::iterator it = match2symMap_MultiRecv.find(A);
+  //DEBUG
+ // formula << "Input symbols to cardinality: ";
   if( it != match2symMap_MultiRecv.end()){
+#if 0
+	  {
+
+		  for(std::set<literalt>::iterator sit=it->second.begin();
+				  sit!=it->second.end();sit++)
+		  {
+		  formula << revMatchMap_MultiRecv[*sit] << " ";
+
+		  }
+		  formula << std::endl;
+
+	  }
+#endif
     rhs.assign(it->second.begin(), it->second.end());
     assert(rhs.size() == it->second.size());
   }
@@ -834,10 +849,14 @@ void OptEncoding::createRFSomeConstraint()
 	if(envA->isMultiRecv && !envA->isbottom) continue; 
 	else {// either not multiRecv or multiRecv that is bottom
 	  m_a = getMILiteral(A).first;
+
 	  if(envA->isbottom) { // if bottom
 	    cardinality = envA->cardinality;  
 	    // get the s_m from all the matches for bottom
+	  //  formula << "m_a : ";
+	   //	  formula << getLitName(m_a,1) << std::endl;
 	    construct_multirecv_match(rhs, envA);
+	    //formula << "End of cardinality" << std::endl;
 	  }
 	  else {// either a Send or Recv which is not a multirecv
 	    cardinality = 1;
@@ -849,18 +868,54 @@ void OptEncoding::createRFSomeConstraint()
 	    totalizer_encodingt se(*slv);
 	    se.atmostk(rhs, cardinality, fo_atmost);
 	    se.add_to_prop(fo_atmost);
-	    //literalt card_lit_atmost = se.get_lit_for_formula(fo_atmost);
-	    
-	    
-	    formulat fo_exactly;
-	    se.exactlyk(rhs, cardinality, fo_exactly);
+#if 0
+	    {
+
+	    	for(bvt::iterator bit=rhs.begin();bit!=rhs.end();bit++)
+	    	{
+	    		formula << (*bit).dimacs() << " : ";
+	    	}
+	    	formula << std::endl;
+
+	    }
+#endif
+
+	    formulat fo_atleastk, fo_atmost_k_minus_one, fo_exactly;
+	    se.atleastk(rhs, cardinality, fo_atleastk);
+	    fo_exactly = fo_atleastk;
+
+	    // m_a --> atleastk
+	    se.set_enabling_lit_for_formula(fo_atleastk,m_a);
+	    assert(cardinality>=1);
+
+	    // \neg m_a --> atmost k-1
+	    se.atmostk(rhs,cardinality-1,fo_atmost_k_minus_one);
+	    se.set_enabling_lit_for_formula(fo_atmost_k_minus_one,!m_a);
+
+
+#if 0
 	    //se.add_to_prop(fo_exactly);
-	    literalt card_lit_exactly = se.get_lit_for_formula(fo_exactly);
+	    std::set<literalt> all_lits;
+	    literalt card_lit_exactly = se.get_lit_for_formula(fo_exactly,all_lits);
+	    {
+	    	formula << "Printing Formula ****" ;
+	    	for(formulat::iterator fit=fo_exactly.begin();fit!=fo_exactly.end();fit++)
+	    	{
+	    		formula << std::endl;
+	    		for(bvt::iterator cit=fit->begin();cit!=fit->end();cit++)
+	    		{
+	    				formula << cit->dimacs() << " ";
+	    		}
+	    	}
+	    	formula << std::endl << "Done with formula ****" << std::endl;
+	    }
+	    all_lits.insert(card_lit_exactly);
+	    maLitsMap[m_a]=all_lits;
 
-
-	     slv->l_set_to(slv->limplies(m_a, card_lit_exactly) , true);
-	     slv->l_set_to(slv->limplies(card_lit_exactly, m_a) , true);
+	     //slv->l_set_to(slv->limplies(m_a, card_lit_exactly) , true);
+	     //slv->l_set_to(slv->limplies(card_lit_exactly, m_a) , true);
 	     maCardMap[m_a]=card_lit_exactly;
+#endif
 	     maInputMap[m_a]=std::pair<bvt,unsigned>(rhs,cardinality);
 	    
 	    //DEBUG PRINT
@@ -1270,7 +1325,8 @@ void OptEncoding::publish()
 	//   formula << getLitName(m_a, 2) << ":1" << std::endl;
 	// else
 	formula << getLitName(m_a, 1) << ":1" << std::endl;
-	assert(slv->l_get(m_a)==slv->l_get(maCardMap[m_a]));
+	//assert(slv->l_get(m_a)==slv->l_get(maCardMap[m_a]));
+#if 0
 	{
 	unsigned set_inputs=0;
 	for(bvt::iterator in_it=maInputMap[m_a].first.begin();
@@ -1280,13 +1336,55 @@ void OptEncoding::publish()
 	}
 	assert(maInputMap[m_a].second==set_inputs);
 	}
+#endif
 	break;
       case tvt::TV_FALSE:
+
 	// if(envA->isCollectiveType())
 	//   formula << getLitName(m_a,2) << ":0" << std::endl;
 	// else
-	formula << getLitName(m_a,1) << ":0" << std::endl;
-	assert(slv->l_get(m_a)==slv->l_get(maCardMap[m_a]));
+	//formula << getLitName(m_a,1) << ":0 : " << m_a.dimacs() << ": " << maInputMap[m_a].second << std::endl;
+	formula << getLitName(m_a,1) << ":0 " << std::endl;
+#if 0
+	{
+
+		unsigned set_inputs=0;
+		for(bvt::iterator in_it=maInputMap[m_a].first.begin();
+				 in_it!=maInputMap[m_a].first.end();in_it++)
+		{
+
+			if(slv->l_get(*in_it).is_true())
+				{
+				formula << getLitName(*in_it,0) << " : " << (*in_it).dimacs() << " ";
+				set_inputs++;
+				}
+		}
+
+		formula << std::endl;
+		if(maInputMap[m_a].second==set_inputs)
+		{
+			for(std::set<literalt>::iterator lit=maLitsMap[m_a].begin();lit!=maLitsMap[m_a].end();lit++)
+			{
+				switch (slv->l_get(*lit).get_value())
+				{
+				case tvt::TV_FALSE : formula << lit->dimacs() << " : FALSE" << std::endl; break;
+				case tvt::TV_TRUE : formula << lit->dimacs() << " : TRUE" << std::endl; break;
+				case tvt::TV_UNKNOWN : formula << lit->dimacs() << " : UNKNOWN" << std::endl; break;
+				default : assert(false);
+
+				}
+			}
+			formula.flush(); formula.flush();
+			std::cout << formula.str();
+			std::cout.flush();
+			std::cout.flush();
+
+			//assert(false);
+		}
+
+	}
+#endif
+//	assert(slv->l_get(m_a)==slv->l_get(maCardMap[m_a]));
 	break;
       case tvt::TV_UNKNOWN:
 	// if(envA->isCollectiveType())
