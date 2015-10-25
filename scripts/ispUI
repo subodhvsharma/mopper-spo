@@ -11,4 +11,4 @@
 # See LICENSE for licensing information
 #
 
- -jar "/home/svs/svs-research/isp-versions/mopper-spo/bin/ispui.jar" $* 
+/usr/bin/java -jar "/home/vojfor/mopper/mopper-spo/installation/bin/ispui.jar" $* 

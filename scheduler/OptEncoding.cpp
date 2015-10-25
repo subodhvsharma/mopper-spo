@@ -120,6 +120,7 @@ void OptEncoding::createMatchLiterals()
 	  break;
 	}
 	uniquepair << (*lit)._pid;
+	uniquepair << "c";
 	uniquepair << (*lit)._index;
       }
     }
@@ -177,8 +178,11 @@ void OptEncoding::createMatchLiterals()
 
       literalt s_m = slv->new_variable();
       uniquepair<<(*sit)._pid;
+      uniquepair<<"c";
       uniquepair<<(*sit)._index;
+      uniquepair<<"x";
       uniquepair<<bottom._pid;
+      uniquepair<<"c";
       uniquepair<<bottom._index;
 
       matchNumeral = uniquepair.str();
@@ -286,8 +290,11 @@ literalt OptEncoding::getMatchLiteral(MatchPtr mptr)
     std::string matchNumeral;
 
     uniquepair<<send._pid;
+    uniquepair<<"c";
     uniquepair<<send._index;
+    uniquepair<<"x";
     uniquepair<<recv._pid;
+    uniquepair<<"c";
     uniquepair<<recv._index;
     matchNumeral = uniquepair.str(); 
 
@@ -324,24 +331,24 @@ std::string OptEncoding::getClkLitName(literalt lt, CB A, CB B)
   
   if (!envA->isCollectiveType() && !envB->isCollectiveType()){
     std::pair <CB, CB> p = revClkMap.find(lt)->second;
-    ss << "C_" << p.first._pid << p.first._index << "_" 
-       << p.second._pid << p.second._index;
+    ss << "C_" << p.first._pid << "c" << p.first._index << "x" 
+       << p.second._pid << "c" << p.second._index;
     return ss.str();
   }
   else if(envA->isCollectiveType() && !envB->isCollectiveType()){
     std::pair<MatchPtr, CB>  p = revClkMapCollEvent.find(lt)->second;
     ss << "C_";
     forall_match(lit, (*(p.first))){
-      ss <<  (*lit)._pid << (*lit)._index;
+      ss <<  (*lit)._pid << "c" << (*lit)._index;
     }
-    ss<< "_" << p.second._pid << p.second._index;
+    ss<< "x" << p.second._pid << "c" << p.second._index;
     return ss.str();
   }
   else if(!envA->isCollectiveType() && envB->isCollectiveType()){
    std::pair<CB, MatchPtr>  p = revClkMapEventColl.find(lt)->second;
-    ss << "C_" << p.first._pid << p.first._index << "_";
+    ss << "C_" << p.first._pid << "c" << p.first._index << "x";
     forall_match(lit, (*(p.second))){
-      ss << (*lit)._pid << (*lit)._index;
+      ss << (*lit)._pid << "c" << (*lit)._index;
     }
     return ss.str();
   }
@@ -349,11 +356,11 @@ std::string OptEncoding::getClkLitName(literalt lt, CB A, CB B)
     std::pair<MatchPtr, MatchPtr> p = revClkMapCollColl.find(lt)->second;
     ss << "C_";
     forall_match(lit, (*(p.first))){
-      ss << (*lit)._pid << (*lit)._index;
+      ss << (*lit)._pid << "c" << (*lit)._index;
     }
-    ss << "_";
+    ss << "x";
     forall_match(lit, (*(p.second))){
-      ss << (*lit)._pid << (*lit)._index;
+      ss << (*lit)._pid << "c" << (*lit)._index;
     }
     return ss.str();
   }
@@ -376,7 +383,7 @@ std::string OptEncoding::getLitName(literalt lt, int type)
     
   case 1:{
     CB A = revEventMap.find(lt)->second;
-    ss << "M_" << A._pid << A._index;
+    ss << "M_" << A._pid << "c" << A._index;
     return ss.str();  
   }
     
@@ -384,21 +391,21 @@ std::string OptEncoding::getLitName(literalt lt, int type)
     MatchPtr Aptr = revCollMap.find(lt)->second;
     ss << "M_";
     forall_match(lit, (*Aptr)){
-      ss << (*lit)._pid  << (*lit)._index;
+      ss << (*lit)._pid  << "c" << (*lit)._index;
     }
     return ss.str();
     
   }
   case 3: {
     CB A = revEventMap.find(lt)->second;
-    ss << "I_" << A._pid  << A._index;
+    ss << "I_" << A._pid << "c" << A._index;
     return ss.str();
   }
   case 4: {
     MatchPtr Aptr = revCollMap.find(lt)->second;
     ss << "I_";
     forall_match(lit, (*Aptr)){
-      ss << (*lit)._pid <<(*lit)._index;
+      ss << (*lit)._pid << "c" <<(*lit)._index;
     }
     return ss.str();
   }
@@ -812,8 +819,11 @@ void OptEncoding::construct_nonmultirecv_match(bvt & rhs, Envelope *envA)
       std::string matchNumeral;
       
       uniquepair << A._pid; 
+      uniquepair<<"c";
       uniquepair << A._index;
+      uniquepair<<"x";
       uniquepair << bottom._pid; 
+      uniquepair<<"c";
       uniquepair << bottom._index;
       
       matchNumeral = uniquepair.str();
@@ -919,7 +929,7 @@ void OptEncoding::createRFSomeConstraint()
 	     maInputMap[m_a]=std::pair<bvt,unsigned>(rhs,cardinality);
 	    
 	    //DEBUG PRINT
-	    formula << "(m_" <<A <<"<->" 
+	    formula << getLitName(m_a,1) <<"<->" 
 		    << "(" << cardinality <<", {";
 	    // if (cardinality == 1){
 	    //   forall_literals(it, rhs){
@@ -1033,7 +1043,7 @@ void OptEncoding::uniqueMatchSend()
 	  sit != image.end(); sit++){
 	if(recv != (*sit)){
 	  std::stringstream ss;
-	  ss << send._pid << send._index << (*sit)._pid << (*sit)._index;
+	  ss << send._pid << "c" << send._index << "x" << (*sit)._pid << "c" << (*sit)._index;
 	  literalt s_n = matchMap.find(ss.str())->second;
 	  formula << "(" << getLitName(s_m, 0) << " -> !"
 		  << getLitName(s_n, 0) << ") &" <<std::endl;
@@ -1062,7 +1072,7 @@ void OptEncoding::uniqueMatchRecv()
 	  sit != image.end(); sit++){
 	if(send != (*sit)){
 	  std::stringstream ss;
-	  ss << (*sit)._pid << (*sit)._index << recv._pid << recv._index;
+	  ss << (*sit)._pid << "c" << (*sit)._index << "x" << recv._pid << "c" << recv._index;
 	  literalt s_n = matchMap.find(ss.str())->second;
 	  slv->l_set_to(slv->limplies(s_m, slv->lnot(s_n)), true);
 	  formula << "(" << getLitName(s_m, 0) << " -> !"
@@ -1102,7 +1112,9 @@ void OptEncoding::noMoreMatchesPossible()
       }
     }
     if(flag){
-      flag = false; continue;
+      flag = false;
+      formula << ")";
+      continue;
     }
     if(!c.empty()){
       slv->l_set_to(slv->lor(c), true);
