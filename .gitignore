@@ -3,4 +3,6 @@
 *.a
 *.so
 *.lo
+*.Po
+config.log
 **/.deps
