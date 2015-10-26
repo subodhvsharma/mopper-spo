@@ -472,7 +472,11 @@ void FMEncoding::createRFConstraint()
       }
     }
     if(flag){ // hoping it to be a send-receive match
+      
+      flag = false;
+      
       assert((**mit).size() == 2);
+      
       CB A = (**mit).front();
       CB B = (**mit).back();
       
