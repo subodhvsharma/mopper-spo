@@ -19,5 +19,5 @@
  * Date:    January 9th 2009
  */
 
-#include "/usr/include/mpi/mpi.h"
-#include "/home/vojfor/mopper/mopper-spo/installation/include/isp/isp.h"
+#include "/usr/include/mpich//mpi.h"
+#include "/home/svs/svs-research/isp-versions/mopper-spo/include/isp/isp.h"

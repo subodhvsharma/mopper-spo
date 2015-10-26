@@ -696,7 +696,9 @@ void OptEncoding::createRFConstraint()
 	break;
       }
     }
-    if(flag){ // hoping it to be a send-receive match
+    if(flag){ // hoping it to be a send-receive matc
+      
+      flag = false;
 
       CB A = (**mit).front();
       CB B = (**mit).back();
@@ -704,7 +706,6 @@ void OptEncoding::createRFConstraint()
       Envelope * envR = last_node->GetTransition(B)->GetEnvelope();
  
       if (envR->isMultiRecv && !envR->isbottom) {
-	flag = false;
 	continue;
       }
       bvt Abv;
