@@ -11,4 +11,4 @@
 # See LICENSE for licensing information
 #
 
-exec "/usr/bin/mpicc" "-L/home/svs/svs-research/isp-versions/mopper-spo/lib" "-I/home/svs/svs-research/isp-versions/mopper-spo/include/isp" -Wl,-rpath=/home/svs/svs-research/isp-versions/mopper-spo/lib -include isp.h $* -lisp_prof
+exec "/home/svs/Utils/mpich-install/bin/mpicc" "-L/home/svs/svs-research/isp-versions/mopper-spo/lib" "-I/home/svs/svs-research/isp-versions/mopper-spo/include/isp" -Wl,-rpath=/home/svs/svs-research/isp-versions/mopper-spo/lib -include isp.h $* -lisp_prof

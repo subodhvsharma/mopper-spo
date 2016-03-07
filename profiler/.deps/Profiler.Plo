@@ -1,8 +1,9 @@
 Profiler.lo: Profiler.c /usr/include/stdc-predef.h isp.h \
- /usr/include/mpich/mpi.h /usr/include/mpich/mpio.h \
- /usr/include/mpich/mpi.h /usr/include/mpich/mpicxx.h \
- /usr/include/stdio.h /usr/include/features.h \
- /usr/include/x86_64-linux-gnu/sys/cdefs.h \
+ /home/svs/Utils/mpich-install/include/mpi.h \
+ /home/svs/Utils/mpich-install/include/mpio.h \
+ /home/svs/Utils/mpich-install/include/mpi.h \
+ /home/svs/Utils/mpich-install/include/mpicxx.h /usr/include/stdio.h \
+ /usr/include/features.h /usr/include/x86_64-linux-gnu/sys/cdefs.h \
  /usr/include/x86_64-linux-gnu/bits/wordsize.h \
  /usr/include/x86_64-linux-gnu/gnu/stubs.h \
  /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
@@ -64,13 +65,13 @@ Profiler.lo: Profiler.c /usr/include/stdc-predef.h isp.h \
 
 isp.h:
 
-/usr/include/mpich/mpi.h:
+/home/svs/Utils/mpich-install/include/mpi.h:
 
-/usr/include/mpich/mpio.h:
+/home/svs/Utils/mpich-install/include/mpio.h:
 
-/usr/include/mpich/mpi.h:
+/home/svs/Utils/mpich-install/include/mpi.h:
 
-/usr/include/mpich/mpicxx.h:
+/home/svs/Utils/mpich-install/include/mpicxx.h:
 
 /usr/include/stdio.h:
 

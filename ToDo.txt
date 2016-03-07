@@ -1,0 +1,44 @@
+TODO List for Mopper and ISP
+============================
+
+1) Debug the function "ProcessInterleaving". This function is
+primarily responsible for supporting verification under arbitrary
+system buffer size.
+
+2) Support for MPI 3.0 (threading). 
+
+3) ISP state signature needs reduction. There is lot of redundant and
+obsolete information in the state. Code refactoring is the need of the
+hour. Anh's OpenMP implementation to parallelize some of the scheduler
+computation should be tested and made default.
+
+4) ISP fails to test the nondeterminism resulting from MPI_Test. Requires debugging. 
+4.1) ISP requires asynchronous semantics support for collectives. 
+
+5) ISP requires limited and focused support for data-flow
+tracking. This would mean that application source code may require
+instrumentation. The instrumentation question has two parts:
+   a) Which instructions should we instrument? Instrumenting the whole
+   program is an overkill and then benefits over complete symbolic
+   execution are lost. In the pathological case, we may have to
+   instrument the whole program. We must first perform static analysis
+   to discover a list of instructions that require
+   instrumentation. LLVM-based analysis and instrumentation seems in
+   my opinion to be the best way to proceed.
+   b) What data should we send to the scheduler from the instrumented
+   function call? Depending whether we are running ISP or Mopper the
+   answer will differ. For ISP, all the scheduler should record is the
+   set of data values that flow in to the assertions. While for
+   Mopper, the expressions have to be recorded, since they translate
+   in to "assumes" in to the formula.
+
+6) ISP requires support for reasoning about symmetry in the
+programs. The other aspect of this analysis is the "small model
+property" which may hold for a large set of programs. Essentially,
+"small model property" dictates that a property of interest if holds
+on a small model then holds for all bigger models. The crux of the
+problem is to show "communication invariance" via either static or
+dynamic taint analysis. This is along the lines of work pursued by
+R. Jhala and others for "test amplification". Not only ISP, but Mopper
+will also be tremendously benefited with such test amplification.  A
+good Masters project.
