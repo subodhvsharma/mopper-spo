@@ -725,9 +725,7 @@ void Scheduler::StartMC () {
     
     exit(0);
       
-    
-    
-    
+     
     // end of modification --svs, sriram 
 
     /* == fprs begin == */
@@ -846,7 +844,7 @@ void Scheduler::StartMC () {
   }
 }
 
-/* 
+
    Function: Scheduler::generateErrorTrace
    Inputs: 
    Output: 
@@ -858,53 +856,52 @@ void Scheduler::StartMC () {
    
    Creator: Subodh Sharma
    Date: 14th October, 2013
- */
-// void Scheduler::generateErrorTrace()
-// {
-//   // 1) delete all the nodes
-//   int i = it->_slist.size(); 
-//   while(i-- > 0){
-//     delete *(it->_slist.end() - 1);
-//     it->_slist.pop_back();
-//     i = (int)(it->_slist.size());
-//   }
+void Scheduler::generateErrorTrace()
+{
+  // 1) delete all the nodes
+  int i = it->_slist.size(); 
+  while(i-- > 0){
+    delete *(it->_slist.end() - 1);
+    it->_slist.pop_back();
+    i = (int)(it->_slist.size());
+  }
   
-//   // 2) Restart the server - close client sockets, flush the mapping
-//   //    of clients to sockets, restart the server
-//   ServerSocket::Restart();
+  // 2) Restart the server - close client sockets, flush the mapping
+  //    of clients to sockets, restart the server
+  ServerSocket::Restart();
 
-//   // 3) Start the client processes
-//   StartClients();
-//   int result = Accept();
-//   if (result != 0){
-//     // server unable to accept or error reading from socket in server
-//     exit(result);
-//   }
+  // 3) Start the client processes
+  StartClients();
+  int result = Accept();
+  if (result != 0){
+    // server unable to accept or error reading from socket in server
+    exit(result);
+  }
   
-//   // 4) Set the runQ info for each process to running
-//   for (int i = 0 ; i < atoi (_num_procs.c_str ()); i++) {
-//     _runQ[i]->_read_next_env = true;
-//     /* == fprs begin == */
-//     it->_is_exall_mode[i] = false;
-//     /* == fprs end == */
-//   }
+  // 4) Set the runQ info for each process to running
+  for (int i = 0 ; i < atoi (_num_procs.c_str ()); i++) {
+    _runQ[i]->_read_next_env = true;
+    /* == fprs begin == */
+    it->_is_exall_mode[i] = false;
+    /* == fprs end == */
+  }
   
-//   // 5) Create a new node -- required since generateInterleaving
-//   //    assumes that you have atleast the starting node.
-//   Node *n = new Node (atoi(_num_procs.c_str ())); 
-//   n->setITree(it);
-//   it->_slist.push_back(n);
+  // 5) Create a new node -- required since generateInterleaving
+  //    assumes that you have atleast the starting node.
+  Node *n = new Node (atoi(_num_procs.c_str ())); 
+  n->setITree(it);
+  it->_slist.push_back(n);
   
-//   // 6) Reset the depth and other info
-//   it->resetDepth();
-//   it->ResetMatchingInfo();
+  // 6) Reset the depth and other info
+  it->resetDepth();
+  it->ResetMatchingInfo();
   
-//   // 6) Call the interleaving generation function with 
-//   //    the modified CHECK function 
-//   Scheduler::_errorTrace = true;
-//   generateFirstInterleaving();
+  // 6) Call the interleaving generation function with 
+  //    the modified CHECK function 
+  Scheduler::_errorTrace = true;
+  generateFirstInterleaving();
   
-// }
+}
 
 
 void Scheduler::generateFirstInterleaving () {
