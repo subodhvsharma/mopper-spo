@@ -1246,7 +1246,8 @@ int ITree::CHECK (ServerSocket &sock, std::list <int> &l) {
 
       cbl = n->ample_set.at(choice);
     }
-    else if(Scheduler::_errorTrace){// [svs] : addition for the generation of error trace
+    // [svs] : addition for the generation of error trace
+    else if(Scheduler::_errorTrace){
       std::vector< std::list<CB> >::iterator ait;
       bool flag = false;
       for (ait = n->ample_set.begin() ; ait != n->ample_set.end() ; ait++) {

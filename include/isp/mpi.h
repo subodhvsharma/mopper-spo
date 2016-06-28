@@ -19,5 +19,5 @@
  * Date:    January 9th 2009
  */
 
-#include "/home/svs/Utils/mpich-install/include/mpi.h"
-#include "/home/svs/svs-research/isp-versions/mopper-spo/include/isp/isp.h"
+#include "/home/faculty/svs/svs-research/mpich-install/include/mpi.h"
+#include "/home/faculty/svs/svs-research/mopper-spo/include/isp/isp.h"

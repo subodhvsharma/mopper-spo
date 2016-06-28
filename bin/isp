@@ -11,8 +11,8 @@
 # See LICENSE for licensing information
 #
 
-export PATH="/home/svs/Utils/mpich-install/bin":$PATH
-if [ ! -x "/home/svs/Utils/mpich-install/bin/mpiexec" ]; then
+export PATH="/home/faculty/svs/svs-research/mpich-install/bin":$PATH
+if [ ! -x "/home/faculty/svs/svs-research/mpich-install/bin/mpiexec" ]; then
     export USE_MPIRUN="true"
 fi
-exec "/home/svs/svs-research/isp-versions/mopper-spo/bin/isp.exe" $*
+exec "/home/faculty/svs/svs-research/mopper-spo/bin/isp.exe" $*

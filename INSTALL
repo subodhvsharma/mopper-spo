@@ -4,6 +4,7 @@
 MPICH2.  
 
 2) Install the solver
+   a') Go to the lingeling dir and type make
    a) Go to the solver directory
    b) make
 

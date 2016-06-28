@@ -161,7 +161,7 @@ private:
   bool hasMoreEnvelopeToRead ();
 
 /* [svs] == SAT encoding */
-//  void  generateErrorTrace();
+  void  generateErrorTrace();
 /* [svs] == end SAT encoding */
 
   ITree *it;

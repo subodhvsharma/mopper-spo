@@ -1,9 +1,10 @@
 HashMap_comm.lo: HashMap_comm.c /usr/include/stdc-predef.h HashMap_comm.h \
- /home/svs/Utils/mpich-install/include/mpi.h \
- /home/svs/Utils/mpich-install/include/mpio.h \
- /home/svs/Utils/mpich-install/include/mpi.h \
- /home/svs/Utils/mpich-install/include/mpicxx.h /usr/include/stdio.h \
- /usr/include/features.h /usr/include/x86_64-linux-gnu/sys/cdefs.h \
+ /home/faculty/svs/svs-research/mpich-install/include/mpi.h \
+ /home/faculty/svs/svs-research/mpich-install/include/mpio.h \
+ /home/faculty/svs/svs-research/mpich-install/include/mpi.h \
+ /home/faculty/svs/svs-research/mpich-install/include/mpicxx.h \
+ /usr/include/stdio.h /usr/include/features.h \
+ /usr/include/x86_64-linux-gnu/sys/cdefs.h \
  /usr/include/x86_64-linux-gnu/bits/wordsize.h \
  /usr/include/x86_64-linux-gnu/gnu/stubs.h \
  /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
@@ -38,13 +39,13 @@ HashMap_comm.lo: HashMap_comm.c /usr/include/stdc-predef.h HashMap_comm.h \
 
 HashMap_comm.h:
 
-/home/svs/Utils/mpich-install/include/mpi.h:
+/home/faculty/svs/svs-research/mpich-install/include/mpi.h:
 
-/home/svs/Utils/mpich-install/include/mpio.h:
+/home/faculty/svs/svs-research/mpich-install/include/mpio.h:
 
-/home/svs/Utils/mpich-install/include/mpi.h:
+/home/faculty/svs/svs-research/mpich-install/include/mpi.h:
 
-/home/svs/Utils/mpich-install/include/mpicxx.h:
+/home/faculty/svs/svs-research/mpich-install/include/mpicxx.h:
 
 /usr/include/stdio.h:
 

@@ -82,7 +82,7 @@ public:
     void GetallSends (std::vector <std::list <int> > &l);
     void GetReceiveAmple (std::vector <std::list <int> > &l);
     bool GetAmpleSet ();
-    inline void setITree(ITree* new_itree);
+    void setITree(ITree* new_itree);
     inline ITree* getITree();
   
   std::set<int> getAllAncestors(CB c); //svs addition

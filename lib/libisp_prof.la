@@ -38,4 +38,4 @@ dlopen=''
 dlpreopen=''
 
 # Directory that this library needs to be installed in:
-libdir='/home/svs/svs-research/isp-versions/mopper-spo/lib'
+libdir='/home/faculty/svs/svs-research/mopper-spo/lib'
